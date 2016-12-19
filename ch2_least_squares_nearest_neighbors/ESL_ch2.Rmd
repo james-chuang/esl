@@ -1,0 +1,201 @@
+---
+output:
+  html_document:
+    fig_width: 5
+    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# **Two simple approaches to prediction: Least Squares and Nearest Neighbors**
+This post follows Chapter 2.3 in the [Elements of Statistical Learning](http://statweb.stanford.edu/~tibs/ElemStatLearn/). Note that the data for exactly reproducing the figures in the book are available in `mixture.example` from the R package `ElemStatLearn`, but here I'll be going through the example from scratch.
+
+This section develops the ***linear model fit by least squares*** and the ***$k$-nearest neighbor (kNN)*** prediction methods. The linear model makes large assumptions about the structure of the data, and yields stable but possibly inaccurate predictions (i.e., it is a relatively 'inflexible', or high-bias/low-variance prediction method). The kNN method makes mild structural assumptions-- its predictions are often accurate but can be unstable (i.e., it is a relatively 'flexible', or low-bias/high-variance prediction method).
+
+First, I generate training data from a Gaussian mixture model as described in section 2.3.3:
+
+> First, we generated 10 means $m_k$ from a bivariate Gaussian distribution $N((1,0)^T, \mathbf{I})$ and labeled this class BLUE. Similarly, 10 more were drawn from $N((0,1)^T, \mathbf{I})$ and labeled class ORANGE. Then for each class we generated 100 observations as follows: for each observation, we picked an $m_k$ at random with probability $1/10$, and then generated a $N(m_k, \mathbf{I}/5)$, thus leading to a mixture of Gaussian clusters for each class.
+
+```{r generate data as in ESL 2.3.3}
+library(MASS)
+library(tibble)
+library(ggplot2)
+
+oracle = function(npoints){
+  #set mean vectors for blue and orange m_k:
+  blue.mu = c(1,0)
+  og.mu = c(0,1)
+  
+  #choose m_k for blue and orange
+  blue.means = as_data_frame(mvrnorm(n=10, mu=blue.mu, Sigma=diag(2)))
+  blue.means$color = factor(rep(0,nrow(blue.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  og.means = as_data_frame(mvrnorm(n=10, mu=og.mu, Sigma=diag(2)))
+  og.means$color = factor(rep(1, nrow(og.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  
+  #randomly choose npoints number of m_k for blue and orange
+  blue.randmean = blue.means[sample(1:nrow(blue.means),npoints, replace = TRUE),1:2]
+  og.randmean = og.means[sample(1:nrow(og.means),npoints, replace = TRUE),1:2]
+  
+  #generate datapoints from MVrandom normal with means chosen above
+  blue.data = as_data_frame(t(apply(blue.randmean, MARGIN=1, function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
+  og.data = as_data_frame(t(apply(og.randmean, MARGIN=1, function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
+  blue.data$color = factor(rep(0, nrow(blue.data)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  og.data$color = factor(rep(1, nrow(og.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  
+  #return plotdata, a dataframe containing training data
+  #return meandata, a dataframe containing the generating m_k
+  return(list(plotdata = rbind(blue.data, og.data), meandata = rbind(blue.means, og.means)))
+}
+
+train = oracle(100)
+
+(a = ggplot(data = train$plotdata, aes(x=V1, y=V2)) +
+      geom_point(aes(color=color), size=2, shape=1) +
+      geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
+      scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+      xlab("X1") + ylab("X2"))
+```
+
+## **predict using linear regression**
+Two-class classification problem. Denote the binary coded target as $Y$, and treat it as a quantitative output. Predictions $\hat Y$ will typically lie in $[0,1]$, and we can assign $\hat G$ the class label according to whether $\hat y > 0.5$.
+
+Linear model:
+$$
+\hat Y = X^T \hat \beta
+$$
+Use method of least squares to fit $\hat \beta$ by minimizing the residual sum of squares:
+$$
+\text{RSS}(\beta) = \sum_{i=1}^N (y_i - x_i^T \beta)^2
+$$
+$\text{RSS}(\beta)$ is a quadratic function, and hence its minimum always exists, though it may not be unique. The solution is easiest to characterize in matrix notation:
+$$
+\text{RSS}(\beta) = (\mathbf{y}- \mathbf{X} \beta)^T (\mathbf{y} - \mathbf{X} \beta)
+$$
+, where $\mathbf{X} \in \mathbb{R}^{N \times p}$ with each row an input vector, and $\mathbf{y} \in \mathbb{R}^N$ representing the outputs in the training set. Differentiating w.r.t. $\beta$ we get the ***normal equations***:
+$$
+\mathbf{X}^T(\mathbf{y} - \mathbf{X}\beta) = 0
+$$
+If $\mathbf{X}^T\mathbf{X}$ is nonsingular, then the unique solution is given by
+$$
+\hat\beta = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}
+$$
+, and the fitted value at the $i$th input $x_i$ is $\hat y_i = \hat y(x_i) = x_i^T \hat \beta$. At an arbitrary input $x_0$ the prediction is $\hat y(x_0) = x_0^T \hat \beta$. The entire fitted surface is characterized by the $p$ parameters $\hat \beta$.
+
+Encode the output class variable $G$, which can take on the values BLUE or ORANGE, and encode it as a response $Y$ where $0$ is BLUE and $1$ is ORANGE. Then convert the fitted values $\hat Y$ to a fitted class variable $\hat G$ according to the rule:
+$$
+\hat G = \begin{cases}
+        \text{ORANGE}  & \text{if } \hat Y > 0.5 \\
+        \text{BLUE}    & \text{if } \hat Y \leq 0.5
+        \end{cases}
+$$
+
+```{r linear model}
+X = as.matrix(cbind(rep(1, nrow(train$plotdata)), train$plotdata[,-3]))
+y = ifelse(train$plotdata$color=="ORANGE", 1, 0)
+
+mylm = function(X,y){
+  return(beta.hat = solve(t(X) %*% X) %*% t(X) %*% y)
+}
+
+beta.hat = mylm(X,y)
+
+#set ranges for grid based on ranges of training data
+x.min = round(min(train$plotdata$V1), digits=1)-0.1
+x.max = round(max(train$plotdata$V1), digits=1)+0.1
+y.min = round(min(train$plotdata$V2), digits=1)-0.1
+y.max = round(max(train$plotdata$V2), digits=1)+0.1
+
+x.range = seq(from=x.min, to=x.max, by=0.1)
+y.range = seq(from=y.min, to=y.max, by=0.1)
+
+x.new = expand.grid(x.range, y.range)
+names(x.new) = names(train$plotdata[,-3])
+
+linreg.yhat = as.matrix(cbind(rep(1, nrow(x.new)), x.new)) %*% beta.hat
+linreg.pred = ifelse(linreg.yhat>0.5,"ORANGE","BLUE")
+linreg.plotdata = cbind(x.new, linreg.pred)
+
+(b = ggplot() +
+      geom_point(data = linreg.plotdata, aes(x=V1, y=V2, color=linreg.pred), size=0.8) +
+      geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), size=2, shape=1) +
+      geom_abline(slope = -beta.hat[2]/beta.hat[3], intercept = (.5-beta.hat[1])/beta.hat[3], color="black") +
+      #geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=3) +
+      scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+      xlab("X1") + ylab("X2"))
+```
+
+## **predict using nearest-neighbor methods**
+
+The $k$-nearest neighbor fit for $\hat Y$ is defined as follows:
+$$
+\hat Y (x) = \frac{1}{k} \sum_{x_i \in N_k(x)} y_i
+$$
+
+, where $N_k(x)$ is the neighborhood of $x$ defined by the $k$ closest points $x_i$ in the training sample, defined by Euclidean distance.
+
+```{r}
+#knn classification function:
+#   inputs: xnew- a matrix of new x values to be classified
+#           x- matrix of training inputs
+#           y- vector of training labels
+#           k- # of nearest neighbors parameter
+myknn = function(xnew, x, y, k){
+  N.new = nrow(xnew)
+  ynew = numeric(N.new)
+  
+  allpoints = rbind(xnew, x)
+  dmatrix = as.matrix(dist(allpoints))[seq(N.new+1, nrow(allpoints)),seq(1, N.new)]
+  rownames(dmatrix) = 1:length(y)
+  
+  for (i in 1:N.new){
+    dist.vector = dmatrix[,i]
+    dist.sorted = sort(dist.vector)
+    nn.indices = as.numeric(names(dist.sorted[1:k]))
+    ynew[i] = sum(y[nn.indices])/k
+  }
+  return(ynew)
+}
+
+plotknn = function(k){
+  knn.yhat = myknn(x.new, train$plotdata[,-3], y, k)
+  knn.pred = ifelse(knn.yhat>0.5,"ORANGE","BLUE")
+  knn.plotdata = as_data_frame(cbind(x.new, knn.pred))
+  boundary.data = as_data_frame(cbind(x.new, knn.yhat))
+    
+  c = ggplot() +
+        geom_point(data=knn.plotdata, aes(x=V1, y=V2, color=knn.pred), size=.8) +
+        geom_point(data=train$plotdata, aes(x=V1,y=V2, color=color), shape=1, size=2) +
+        geom_contour(data=boundary.data, aes(x=V1,y=V2,z=knn.yhat), bins=1, color="black") +
+        scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+        ggtitle(paste(k, "nn"))
+  return(c)
+}
+
+(c = plotknn(k=1))
+```
+
+```{r knn, echo=FALSE}
+#note: boundary plotting breaks as k increases w/default geom_contour
+
+
+#(d=plotknn(k=2))
+#(e=plotknn(k=3))
+#(f=plotknn(k=5))
+#(g=plotknn(k=10))
+#(h=plotknn(k=15))
+```
+
+```{r generate test data}
+test = oracle(5000)
+
+X.test = as.matrix(cbind(rep(1, nrow(test$plotdata)), test$plotdata[,-3]))
+y.test = ifelse(test$plotdata$color=="ORANGE", 1, 0)
+
+test.beta.hat = mylm(X.test, y.test)
+
+test.linreg.yhat = X.test %*% test.beta.hat
+test.linreg.pred = ifelse(test.linreg.yhat>0.5, 1, 0)
+
+linreg.testerr = sum(diag((table(y.test,test.linreg.pred)/length(y.test)) %*% matrix(c(0,1,1,0), ncol=2)))
+```
