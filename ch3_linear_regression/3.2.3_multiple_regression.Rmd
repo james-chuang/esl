@@ -1,0 +1,167 @@
+---
+output:
+  html_document:
+    fig_width: 5
+    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The linear model $f(X) = \beta_0 + \sum_{j=1}^p X_j \beta_j$ with $p > 1$ inputs is called the ***multiple linear regression model***. The least squares estimates $\hat\beta = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}$ for this model are best understood in terms of the estimates for the ***univariate*** linear model.
+
+Suppose first a univariate model with no intercept, i.e.,
+$$
+Y = X \beta + \epsilon
+$$
+. In the univariate case, the least squares estimate and residuals can be written as inner products:
+$$
+\begin{align}
+\hat \beta & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} & \text{in the univariate case is} \\
+\hat \beta & = \frac{\langle \mathbf{x}, \mathbf{y} \rangle}{\langle \mathbf{x}, \mathbf{x} \rangle} \\
+\end{align}
+$$
+
+$$
+\mathbf{r} = \mathbf{y}- \mathbf{x} \hat \beta
+$$
+. This simple univariate regression provides the building block for multiple linear regression. Suppose next that the inputs $\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_p$ (the columns of the data matrix $X$) are orthogonal, i.e. $\langle \mathbf{x}_j,\mathbf{x}_k \rangle = 0$ for all $j \neq k$. Then, the multiple least squares estimates $\hat \beta_j$ are equal to the univariate estimates $\langle \mathbf{x}_j, \mathbf{y}\rangle/ \langle \mathbf{x}_j, \mathbf{x}_j \rangle$:
+$$
+\begin{align}
+\hat \beta & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
+\hat \beta & =  \left(\begin{bmatrix}
+                - & \mathbf{x}_1  & - \\
+                - & \mathbf{x}_2  & - \\
+                  & \vdots        &   \\
+                - & \mathbf{x}_p  & -
+                \end{bmatrix}
+                \begin{bmatrix}
+                \mid          & \mid          &         & \mid          \\
+                \mathbf{x}_1  & \mathbf{x}_2  & \cdots  & \mathbf{x}_p  \\
+                \mid          & \mid          &         & \mid
+                \end{bmatrix}
+                \right)^{-1}
+                \begin{bmatrix}
+                - & \mathbf{x}_1  & - \\
+                - & \mathbf{x}_2  & - \\
+                  & \vdots        &   \\
+                - & \mathbf{x}_p  & -
+                \end{bmatrix}
+                \mathbf{y} \\
+          & = \begin{bmatrix}
+              \langle \mathbf{x}_1, \mathbf{x}_1 \rangle  & \langle \mathbf{x}_1, \mathbf{x}_2 \rangle & \cdots & \langle \mathbf{x}_1, \mathbf{x}_p \rangle \\
+              \langle \mathbf{x}_2, \mathbf{x}_1 \rangle  & \langle \mathbf{x}_2, \mathbf{x}_2 \rangle & \cdots & \langle \mathbf{x}_2, \mathbf{x}_p \rangle \\
+              \vdots                                      & \vdots                                     & \ddots & \vdots \\
+              \langle \mathbf{x}_p, \mathbf{x}_1 \rangle  & \langle \mathbf{x}_p, \mathbf{x}_2 \rangle & \cdots & \langle \mathbf{x}_p, \mathbf{x}_p \rangle \\
+              \end{bmatrix}^{-1}
+              \begin{bmatrix}
+              \langle \mathbf{x}_1, \mathbf{y}\rangle \\
+              \langle \mathbf{x}_2, \mathbf{y}\rangle \\
+              \vdots                                  \\
+              \langle \mathbf{x}_p, \mathbf{y}\rangle
+              \end{bmatrix} \\
+          & = \begin{bmatrix}
+              \langle \mathbf{x}_1, \mathbf{x}_1 \rangle & 0 & \cdots  & 0 \\
+              0 & \langle \mathbf{x}_2, \mathbf{x}_2 \rangle & \cdots  & 0 \\
+              \vdots  & \vdots  & \ddots  & \vdots  \\
+              0 & 0 & \cdots & \langle \mathbf{x}_p, \mathbf{x}_p \rangle 
+              \end{bmatrix}^{-1}
+              \begin{bmatrix}
+              \langle \mathbf{x}_1, \mathbf{y}\rangle \\
+              \langle \mathbf{x}_2, \mathbf{y}\rangle \\
+              \vdots                                  \\
+              \langle \mathbf{x}_p, \mathbf{y}\rangle
+              \end{bmatrix} \\
+          & =  \begin{bmatrix}
+              \langle \mathbf{x}_1, \mathbf{x}_1 \rangle^{-1} & 0 & \cdots  & 0 \\
+              0 & \langle \mathbf{x}_2, \mathbf{x}_2 \rangle^{-1} & \cdots  & 0 \\
+              \vdots  & \vdots  & \ddots  & \vdots  \\
+              0 & 0 & \cdots & \langle \mathbf{x}_p, \mathbf{x}_p \rangle^{-1}
+              \end{bmatrix}
+              \begin{bmatrix}
+              \langle \mathbf{x}_1, \mathbf{y}\rangle \\
+              \langle \mathbf{x}_2, \mathbf{y}\rangle \\
+              \vdots                                  \\
+              \langle \mathbf{x}_p, \mathbf{y}\rangle
+              \end{bmatrix} \\
+\hat\beta & = \begin{bmatrix}
+              \frac{\langle \mathbf{x}_1, \mathbf{y}\rangle}{\langle \mathbf{x}_1, \mathbf{x}_1 \rangle} \\
+              \frac{\langle \mathbf{x}_2, \mathbf{y}\rangle}{\langle \mathbf{x}_2, \mathbf{x}_2 \rangle} \\
+              \vdots                                  \\
+              \frac{\langle \mathbf{x}_p, \mathbf{y}\rangle}{\langle \mathbf{x}_p, \mathbf{x}_p \rangle}
+              \end{bmatrix} \\
+\end{align}
+$$
+I.e., when the inputs are orthogonal, they have no effect on each other's parameter estimates in the model.
+
+Orthogonal inputs occur most often with balanced, designed experiments where orthogonality is enforced, but almost never with observational data. Hence we will have to orthogonalize them to carry this idea further. Suppose next that we have an intercept and a single input $\mathbf{x}$, i.e. $\mathbf{y} = \beta_o + \beta_1 \mathbf{x}$. Then the least squares coefficient of $x$ has the form
+$$
+\hat \beta_1 = \frac{\langle \mathbf{x}- \bar x \mathbf{1} , \mathbf{y}\rangle}{\langle \mathbf{x}- \bar x \mathbf{1} , \mathbf{x}- \bar x \mathbf{1}\rangle}
+$$
+, where $\bar x = \sum_i x_i/N$, and $\mathbf{1} = \mathbf{x}_0$, the vector of $N$ ones.
+$$
+\begin{align}
+\hat \beta  & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
+            & = \left(\begin{bmatrix}
+            - & \mathbf{1}    & - \\
+            - & \mathbf{x}_1  & - 
+            \end{bmatrix}
+            \begin{bmatrix}
+            \mid        & \mid          \\
+            \mathbf{1}  & \mathbf{x}_1  \\
+            \mid        & \mid
+            \end{bmatrix}
+            \right)^{-1}
+            \begin{bmatrix}
+            - & \mathbf{1}    & - \\
+            - & \mathbf{x}_1  & - 
+            \end{bmatrix}
+            \mathbf{y} \\
+        & = \begin{bmatrix}
+            \langle \mathbf{1}, \mathbf{1} \rangle  & \langle \mathbf{1}, \mathbf{x}_1 \rangle \\
+            \langle \mathbf{x}_1, \mathbf{1}\rangle & \langle \mathbf{x}_1, \mathbf{x}_1\rangle
+            \end{bmatrix}^{-1}
+            \begin{bmatrix}
+            \langle \mathbf{1}, \mathbf{y} \rangle \\
+            \langle \mathbf{x}, \mathbf{y} \rangle
+            \end{bmatrix} \\
+            
+        & = \\
+        
+        & = \\
+            
+        & = \langle \quad \rangle\langle \mathbf{1}, \mathbf{y}\rangle + \langle \quad \rangle \langle \mathbf{x}, \mathbf{y}\rangle        \\    
+        & = \frac{-\langle \mathbf{x}_1,\mathbf{1} \rangle \langle \mathbf{1}, \mathbf{y} \rangle + \langle \mathbf{1}, \mathbf{1} \rangle \langle \mathbf{x}_1, \mathbf{y} \rangle}{\langle \mathbf{1}, \mathbf{1}\rangle\langle \mathbf{x}_1, \mathbf{x}_1 \rangle- \langle \mathbf{x}_1, \mathbf{1}\rangle \langle \mathbf{1}, \mathbf{x}_1\rangle}\\
+        
+        & = \frac{- \sum_i x_i \sum_i y_i + N \sum_i x_i y_i}{N \sum_i x_i^2- \sum_i x_i \sum_i x_i}\\
+        
+        & =  \frac{\langle \mathbf{x}- \left(\frac{\sum_i x_i}{N} \right)\mathbf{1}, \mathbf{y}\rangle}{\langle \mathbf{x}- \left(\frac{\sum_i x_i}{N} \right) \mathbf{1},\mathbf{x}- \left(\frac{\sum_i x_i}{N} \right) \mathbf{1}\rangle}  \\
+        & = \frac{\langle \mathbf{x}- \bar x \mathbf{1}, \mathbf{y}\rangle}{\langle \mathbf{x}- \bar x \mathbf{1},\mathbf{x}- \bar x \mathbf{1}\rangle}
+\end{align}
+$$
+
+We can view this estimate as the result of two applications of the simple regression. The steps are:
+
+1. regress $\mathbf{x}$ on $\mathbf{1}$ to produce the residual $\mathbf{z} = \mathbf{x} = \bar x \mathbf{1}$;
+2. regress $\mathbf{y}$ on the residual $\mathbf{z}$ to give the coefficient $\hat \beta_1$.
+
+In this procedure, "regress $\mathbf{b}$ on $\mathbf{a}$" means a simple univariate regression of $\mathbf{b}$ on $\mathbf{a}$ with no intercept, producing coefficient $\hat \gamma = \langle \mathbf{a}, \mathbf{b} \rangle/\langle \mathbf{a}, \mathbf{a} \rangle$ and residual vector $\mathbf{b} - \hat \gamma \mathbf{a}$. We say that $\mathbf{b}$ is adjusted for $\mathbf{a}$, or is "orthogonalized" with respect to $\mathbf{a}$.
+
+## **Gram-Schmidt procedure for multiple regression**
+
+1. Initialize $\mathbf{z}_0 = \mathbf{x}_0 = \mathbf{1}$
+2. For $j = 1,2, \dots, p$
+    - Regress $\mathbf{x}_j$ on $\mathbf{z}_0, \mathbf{z}_1, \dots, \mathbf{z}_{j-1}$ to produce coefficients $\hat \gamma_{\ell j}$:
+    $$
+    \hat \gamma_{\ell j} = \frac{\langle \mathbf{z}_\ell , \mathbf{x}_j \rangle}{\langle \mathbf{z}_\ell, \mathbf{z}_\ell \rangle}, \quad \ell = 0, \dots, j-1
+    $$
+    and residual vector $\mathbf{z}_j$:
+    $$
+    \mathbf{z}_j = \mathbf{x}_j - \sum_{k = 0}^{j-1}\hat \gamma_{kj} \mathbf{z}_k
+    $$
+3. Regress $\mathbf{y}$ on the residual $\mathbf{z}_p$ to give the estimate $\hat \beta_p$, i.e.:
+  $$
+  \hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}
+  $$
+
