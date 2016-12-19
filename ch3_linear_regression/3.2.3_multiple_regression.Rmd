@@ -164,4 +164,62 @@ In this procedure, "regress $\mathbf{b}$ on $\mathbf{a}$" means a simple univari
   $$
   \hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}
   $$
+Re-arranging the residual in step 2 ($\mathbf{x}_j = \mathbf{z}_j + \sum_{k = 0}^{j-1}\hat \gamma_{kj} \mathbf{z}_k$), we can see that each of the $\mathbf{x}_j$ is a linear combination of the $\mathbf{z}_k, k \leq j$. Since the $\mathbf{z}_j$ are all orthogonal, they form a basis for the column space of $\mathbf{X}$, and hence the least squares projection onto this subspace is $\hat{\mathbf{y}}$. Since $\mathbf{z}_p$ alone involves $\mathbf{x}_p$ (with coefficient 1), we see that the coefficient $\hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}$ is indeed the multiple regression coefficient of $\mathbf{y}$ on $\mathbf{x}_p$. This key result exposes the effect of correlated inputs in multiple regression. Note also that by rearranging the $\mathbf{x}_j$, any one of them could be in the last position, and a similar result holds. Hence, stated more generally, we have shown that the $j$th multiple regression coefficient is the univariate regression coefficient of $\mathbf{y}$ on $\mathbf{x}_{0,1,\dots(j-1)(j+1)\dots,p}$, the residual after regressing $\mathbf{x}_j$ on $\mathbf{x}_0, \mathbf{x}_1, \dots, \mathbf{x}_{j-1}, \mathbf{x}_{j+1}, \dots, \mathbf{x}_p$:
 
+> The multiple regression coefficient $\hat \beta_j$ represents the **additional** contribution of $\mathbf{x}_j$ on $\mathbf{y}$, **after $\mathbf{x}_j$ has been adjusted for $\mathbf{x}_0, \mathbf{x}_1, \dots, \mathbf{x}_{j-1}, \mathbf{x}_{j+1}, \dots, \mathbf{x}_{p}$.**
+
+If $\mathbf{x}_p$ is highly corelated with some of the other $\mathbf{x}_k$'s, the residual vector $\mathbf{z}_p$ will be close to zero, and hcne the coefficient $\hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}$ will be very unstable. This will be true for all the variables in the correlated set. In such situations, we might have all the Z-scores be small -- any one of the set can be deleted -- yet we cannot delete them all.
+
+We can also obtain an alternate formula for the variance estimates of the coefficients:
+$$
+\text{Var}(\hat \beta_p) = \frac{\sigma^2}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle} = \frac{\sigma^2}{\lVert \mathbf{z}_p\rVert^2} 
+$$
+
+. In other words, the precision with which we can estimate $\hat \beta_p$ depends on the length of the residual vector $\mathbf{z}_p$; this represents how much of $\mathbf{x}_p$ is unexplained by the other $\mathbf{x}_k$'s.
+
+Step 2 of the algorithm can be represented in matrix form:
+$$
+\mathbf{X} = \mathbf{Z}\mathbf{\Gamma}
+$$
+, where $\mathbf{z}_j$ has as columns the $\mathbf{z}_j$ (in order), and $\mathbf{\Gamma}$ is the upper triangular matrix with entries $\hat \gamma_{kj}$. I.e.:
+$$
+\mathbf{X} = 
+\mathbf{Z \Gamma} = \begin{bmatrix}
+                    \mid          & \mid          &         & \mid          \\
+                    \mathbf{z}_0  & \mathbf{z}_1  & \cdots  & \mathbf{z}_p  \\
+                    \mid          & \mid          &         & \mid
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                    \gamma_{0,0}  & \gamma_{0,1}  & \cdots  & \gamma_{0,p}  \\
+                    0             & \gamma_{1,1}  & \cdots  & \gamma_{1,p}  \\
+                    \vdots        & \vdots        & \ddots  & \cdots        \\
+                    0             & 0             & \cdots  & \gamma_{p,p}  
+                    \end{bmatrix}
+$$
+
+Introducing the diagonal matrix $\mathbf{D}$ with $j$th diagonal entry $D_{j,j} = \lVert \mathbf{z}_j \rVert$, we get:
+$$
+\begin{align}
+\mathbf{X}  & = \mathbf{ZD}^{-1}\mathbf{D \Gamma} \\
+            & = \mathbf{QR}
+
+\end{align}
+$$
+, the so-called $QR$ decomposition of $\mathbf{X}$. Here $\mathbf{Q}$ is an $N \times (p + 1)$ orthogonal matrix, $\mathbf{Q}^T \mathbf{Q}=\mathbf{I}$, and $\mathbf{R}$ is a $(p+1) \times (p+1)$ upper triangular matrix.
+
+The $\mathbf{QR}$ decomposition represents a convenient orthogonal basis for the column space of $\mathbf{X}$. For example, the least squares solution is given by:
+$$
+\begin{align}
+\hat\beta         & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
+                  & = \left[(\mathbf{QR})^T(\mathbf{QR}) \right]^{-1} (\mathbf{QR})^T \mathbf{y} \\
+                  & = \left[\mathbf{R}^T \mathbf{Q}^T \mathbf{Q} \mathbf{R}\right]^{-1} \mathbf{R}^T \mathbf{Q}^T \mathbf{y} \\
+                  & = \mathbf{R}^{-1}\left(\mathbf{R}^T\right)^{-1} \mathbf{R}^T \mathbf{Q}^T \mathbf{y}\\
+\hat\beta         & = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}, \\
+                  \\
+\hat{\mathbf{y}}  & = \mathbf{X}\hat \beta \\
+                  & = \left(\mathbf{QR}\right)\left(\mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y} \right) \\
+\hat{\mathbf{y}}  & = \mathbf{QQ}^T\mathbf{y}
+\end{align}
+$$
+
+$\hat\beta = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}$ is easy to solve because $\mathbf{R}$ is upper triangular.

@@ -245,8 +245,8 @@ Orthogonal inputs occur most often with balanced, designed experiments where ort
 <li>regress <span class="math inline">\(\mathbf{y}\)</span> on the residual <span class="math inline">\(\mathbf{z}\)</span> to give the coefficient <span class="math inline">\(\hat \beta_1\)</span>.</li>
 </ol>
 <p>In this procedure, “regress <span class="math inline">\(\mathbf{b}\)</span> on <span class="math inline">\(\mathbf{a}\)</span>” means a simple univariate regression of <span class="math inline">\(\mathbf{b}\)</span> on <span class="math inline">\(\mathbf{a}\)</span> with no intercept, producing coefficient <span class="math inline">\(\hat \gamma = \langle \mathbf{a}, \mathbf{b} \rangle/\langle \mathbf{a}, \mathbf{a} \rangle\)</span> and residual vector <span class="math inline">\(\mathbf{b} - \hat \gamma \mathbf{a}\)</span>. We say that <span class="math inline">\(\mathbf{b}\)</span> is adjusted for <span class="math inline">\(\mathbf{a}\)</span>, or is “orthogonalized” with respect to <span class="math inline">\(\mathbf{a}\)</span>.</p>
-<div id="gram-schmidt-orthogonalization" class="section level2">
-<h2><strong>Gram-Schmidt orthogonalization</strong></h2>
+<div id="gram-schmidt-procedure-for-multiple-regression" class="section level2">
+<h2><strong>Gram-Schmidt procedure for multiple regression</strong></h2>
 <ol style="list-style-type: decimal">
 <li>Initialize <span class="math inline">\(\mathbf{z}_0 = \mathbf{x}_0 = \mathbf{1}\)</span></li>
 <li>For <span class="math inline">\(j = 1,2, \dots, p\)</span>
@@ -259,8 +259,46 @@ Orthogonal inputs occur most often with balanced, designed experiments where ort
 </ul></li>
 <li>Regress <span class="math inline">\(\mathbf{y}\)</span> on the residual <span class="math inline">\(\mathbf{z}_p\)</span> to give the estimate <span class="math inline">\(\hat \beta_p\)</span>, i.e.: <span class="math display">\[
   \hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}
-  \]</span></li>
+  \]</span> Re-arranging the residual in step 2 (<span class="math inline">\(\mathbf{x}_j = \mathbf{z}_j + \sum_{k = 0}^{j-1}\hat \gamma_{kj} \mathbf{z}_k\)</span>), we can see that each of the <span class="math inline">\(\mathbf{x}_j\)</span> is a linear combination of the <span class="math inline">\(\mathbf{z}_k, k \leq j\)</span>. Since the <span class="math inline">\(\mathbf{z}_j\)</span> are all orthogonal, they form a basis for the column space of <span class="math inline">\(\mathbf{X}\)</span>, and hence the least squares projection onto this subspace is <span class="math inline">\(\hat{\mathbf{y}}\)</span>. Since <span class="math inline">\(\mathbf{z}_p\)</span> alone involves <span class="math inline">\(\mathbf{x}_p\)</span> (with coefficient 1), we see that the coefficient <span class="math inline">\(\hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}\)</span> is indeed the multiple regression coefficient of <span class="math inline">\(\mathbf{y}\)</span> on <span class="math inline">\(\mathbf{x}_p\)</span>. This key result exposes the effect of correlated inputs in multiple regression. Note also that by rearranging the <span class="math inline">\(\mathbf{x}_j\)</span>, any one of them could be in the last position, and a similar result holds. Hence, stated more generally, we have shown that the <span class="math inline">\(j\)</span>th multiple regression coefficient is the univariate regression coefficient of <span class="math inline">\(\mathbf{y}\)</span> on <span class="math inline">\(\mathbf{x}_{0,1,\dots(j-1)(j+1)\dots,p}\)</span>, the residual after regressing <span class="math inline">\(\mathbf{x}_j\)</span> on <span class="math inline">\(\mathbf{x}_0, \mathbf{x}_1, \dots, \mathbf{x}_{j-1}, \mathbf{x}_{j+1}, \dots, \mathbf{x}_p\)</span>:</li>
 </ol>
+<blockquote>
+<p>The multiple regression coefficient <span class="math inline">\(\hat \beta_j\)</span> represents the <strong>additional</strong> contribution of <span class="math inline">\(\mathbf{x}_j\)</span> on <span class="math inline">\(\mathbf{y}\)</span>, <strong>after <span class="math inline">\(\mathbf{x}_j\)</span> has been adjusted for <span class="math inline">\(\mathbf{x}_0, \mathbf{x}_1, \dots, \mathbf{x}_{j-1}, \mathbf{x}_{j+1}, \dots, \mathbf{x}_{p}\)</span>.</strong></p>
+</blockquote>
+<p>If <span class="math inline">\(\mathbf{x}_p\)</span> is highly corelated with some of the other <span class="math inline">\(\mathbf{x}_k\)</span>’s, the residual vector <span class="math inline">\(\mathbf{z}_p\)</span> will be close to zero, and hcne the coefficient <span class="math inline">\(\hat \beta_p = \frac{\langle \mathbf{z}_p, \mathbf{y}\rangle}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle}\)</span> will be very unstable. This will be true for all the variables in the correlated set. In such situations, we might have all the Z-scores be small – any one of the set can be deleted – yet we cannot delete them all.</p>
+<p>We can also obtain an alternate formula for the variance estimates of the coefficients: <span class="math display">\[
+\text{Var}(\hat \beta_p) = \frac{\sigma^2}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle} = \frac{\sigma^2}{\lVert \mathbf{z}_p\rVert^2} 
+\]</span></p>
+<p>. In other words, the precision with which we can estimate <span class="math inline">\(\hat \beta_p\)</span> depends on the length of the residual vector <span class="math inline">\(\mathbf{z}_p\)</span>; this represents how much of <span class="math inline">\(\mathbf{x}_p\)</span> is unexplained by the other <span class="math inline">\(\mathbf{x}_k\)</span>’s.</p>
+<p>Step 2 of the algorithm can be represented in matrix form: <span class="math display">\[
+\mathbf{X} = \mathbf{Z}\mathbf{\Gamma}
+\]</span> , where <span class="math inline">\(\mathbf{z}_j\)</span> has as columns the <span class="math inline">\(\mathbf{z}_j\)</span> (in order), and <span class="math inline">\(\mathbf{\Gamma}\)</span> is the upper triangular matrix with entries <span class="math inline">\(\hat \gamma_{kj}\)</span>. I.e.: <span class="math display">\[
+\mathbf{X} = 
+\mathbf{Z \Gamma} = \begin{bmatrix}
+                    \mid          &amp; \mid          &amp;         &amp; \mid          \\
+                    \mathbf{z}_0  &amp; \mathbf{z}_1  &amp; \cdots  &amp; \mathbf{z}_p  \\
+                    \mid          &amp; \mid          &amp;         &amp; \mid
+                    \end{bmatrix}
+                    \begin{bmatrix}
+                    \gamma_{0,0}  &amp; \gamma_{0,1}  &amp; \cdots  &amp; \gamma_{0,p}  \\
+                    0             &amp; \gamma_{1,1}  &amp; \cdots  &amp; \gamma_{1,p}  \\
+                    \vdots        &amp; \vdots        &amp; \ddots  &amp; \cdots        \\
+                    0             &amp; 0             &amp; \cdots  &amp; \gamma_{p,p}  
+                    \end{bmatrix}
+\]</span></p>
+Introducing the diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> with <span class="math inline">\(j\)</span>th diagonal entry <span class="math inline">\(D_{j,j} = \lVert \mathbf{z}_j \rVert\)</span>, we get: $$
+<span class="math display">\[\begin{align}
+\mathbf{X}  &amp; = \mathbf{ZD}^{-1}\mathbf{D \Gamma} \\
+            &amp; = \mathbf{QR}
+
+\end{align}\]</span>
+<p>$$</p>
+<p>, the so-called <span class="math inline">\(QR\)</span> decomposition of <span class="math inline">\(\mathbf{X}\)</span>. Here <span class="math inline">\(\mathbf{Q}\)</span> is an <span class="math inline">\(N \times (p + 1)\)</span> orthogonal matrix, <span class="math inline">\(\mathbf{Q}^T \mathbf{Q}=\mathbf{I}\)</span>, and <span class="math inline">\(\mathbf{R}\)</span> is a <span class="math inline">\((p+1) \times (p+1)\)</span> upper triangular matrix.</p>
+<p>The <span class="math inline">\(\mathbf{QR}\)</span> decomposition represents a convenient orthogonal basis for the column space of <span class="math inline">\(\mathbf{X}\)</span>. For example, the least squares solution is given by: <span class="math display">\[
+\begin{align}
+\hat\beta       &amp; = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}, \\
+\hat{\mathbf{y}} &amp; = \mathbf{QQ}^T\mathbf{y}
+\end{align}
+\]</span></p>
 </div>
 
 
