@@ -1,0 +1,34 @@
+---
+output:
+  html_document:
+    fig_width: 5
+    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+---
+
+**Ex. 2.1** Suppose each of $K$-classes has an associated target $t_k$, which is a vector of all zeros, except for a one in the $k$th position. Show that classifying to the largest element of $\hat y$ amounts to choosing the closest target, $\min_k \lVert t_k-\hat y\rVert$, if the elements of $\hat y$ sum to one.
+
+The problem, restated: Show that $\underset{k}{\text{argmin}} \lVert t_k- \hat y\rVert = \underset{k}{\text{argmax}}(y_k)$ subject to :
+
+$$
+\begin{align}
+& \quad \underset{k}{\text{argmin}} \lVert t_k - \hat y \rVert \\
+& = \underset{k}{\text{argmin}} \lVert t_k - \hat y \rVert^2                & x \to x^2 \text{ is monotonic}  \\
+& = \underset{k}{\text{argmin}} \sum_{i=1}^k \left(y_i - (t_k)_i \right)^2  & \text{definition of norm, ignoring } \sqrt{} \text{ due to argmin}     \\
+& = \underset{k}{\text{argmin}} \sum_{i=1}^k \left(y_i-2y_i(t_k)_i+(t_k)_i^2 \right)                          \\
+& = \underset{k}{\text{argmin}} \sum_{i=1}^k \left(-2y_i(t_k)_i +(t_k)_i^2 \right)  & \sum_{i=1}^k y_i^2 \text{ is independent of k} \\
+& = \underset{k}{\text{argmin}} \left(-2y_k + 1 \right)   & \sum_{i=1}^k y_i(t_k)_i=y_k, \quad \sum_{i=1}^k (t_k)_i^2 = 1               \\
+& = \underset{k}{\text{argmin}} \left(-2y_k \right)                                                           \\
+& = \underset{k}{\text{argmax}} \left(y_k \right)
+\end{align}
+$$
+
+**Ex 2.2** Show how to compute the Bayes decision boundary for the simulation example in Figure 2.5.
+
+The simulation draws $10$ points $p_1, \dots, p_{10} \in \mathbb{R}^2$ from $N\left(\begin{bmatrix}1 \\0 \end{bmatrix}, I_2 \right)$ and 10 points $q_1, \dots, q_{10} \in \mathbb{R}^2$ from $N \left(\begin{bmatrix}0 \\ 1 \end{bmatrix}, I_2 \right)$. These points $p_i$ and $q_j$ we assume to be fixed, and are used as the means of normal distributions with covariance matrix $I_2/5$. The Bayes decision boundary is found by equating the likelihoods of a point being generated from the blue generating function and the orange generating function:
+$$
+\begin{align}
+P(\text{blue}) & = P(\text{orange}) \\
+\sum_i \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbb{x})\right)}
+
+\end{align}
+$$
