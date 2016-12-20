@@ -214,9 +214,10 @@ for (k in kvector){
   rowcount = rowcount + 1
 }
 
-error.plot = ggplot(data = melt(knn.error.df, id.vars='k'), aes(x=k, y=value, group=variable, color=variable)) +
+(error.plot = ggplot(data = melt(knn.error.df, id.vars='k'), aes(x=k, y=value, group=variable, color=variable)) +
               geom_point() +
               geom_line() +
               scale_x_log10() +
               scale_color_manual(values = c("blue","orange"))
+)
 ```
