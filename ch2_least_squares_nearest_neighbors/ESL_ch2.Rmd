@@ -20,6 +20,7 @@ First, I generate training data from a Gaussian mixture model as described in se
 ```{r generate data as in ESL 2.3.3}
 library(MASS)
 library(tibble)
+library(reshape2)
 library(ggplot2)
 
 oracle = function(npoints){
@@ -157,6 +158,10 @@ myknn = function(xnew, x, y, k){
   return(ynew)
 }
 
+prediction.error = function(yhat, y){
+  return(sum(diag((table(yhat,y)/length(y)) %*% matrix(c(0,1,1,0), ncol=2))))
+}
+
 plotknn = function(k){
   knn.yhat = myknn(x.new, train$plotdata[,-3], y, k)
   knn.pred = ifelse(knn.yhat>0.5,"ORANGE","BLUE")
@@ -173,23 +178,14 @@ plotknn = function(k){
 }
 
 (c = plotknn(k=1))
-```
-
-```{r knn, echo=FALSE}
-#note: boundary plotting breaks as k increases w/default geom_contour
-
-
-#(d=plotknn(k=2))
-#(e=plotknn(k=3))
-#(f=plotknn(k=5))
-#(g=plotknn(k=10))
-#(h=plotknn(k=15))
+(d = plotknn(k=15))
 ```
 
 ```{r generate test data}
 train.linreg.yhat = X %*% beta.hat
 train.linreg.pred = ifelse(train.linreg.yhat>0.5, 1, 0)
-linreg.trainerr = sum(diag((table(y,train.linreg.pred)/length(y)) %*% matrix(c(0,1,1,0), ncol=2)))
+#linreg.trainerr = sum(diag((table(y,train.linreg.pred)/length(y)) %*% matrix(c(0,1,1,0), ncol=2)))
+linreg.trainerr = prediction.error(y, train.linreg.pred)
 
 test = oracle(5000)
 
@@ -201,5 +197,26 @@ test.beta.hat = mylm(X.test, y.test)
 test.linreg.yhat = X.test %*% test.beta.hat
 test.linreg.pred = ifelse(test.linreg.yhat>0.5, 1, 0)
 
-linreg.testerr = sum(diag((table(y.test,test.linreg.pred)/length(y.test)) %*% matrix(c(0,1,1,0), ncol=2)))
+#linreg.testerr = sum(diag((table(y.test,test.linreg.pred)/length(y.test)) %*% matrix(c(0,1,1,0), ncol=2)))
+linreg.testerr = prediction.error(y.test, test.linreg.pred)
+
+
+#calculate training and test errors for KNN
+kvector = c(1,3,5,7,11,21,31,45,69,101,151)
+
+knn.error.df = data_frame(k = integer(), trainerr = double(), testerr = double())
+
+rowcount = 1
+for (k in kvector){
+  knn.error.df[rowcount,1] = k
+  knn.error.df[rowcount,2] = prediction.error(myknn(X[,-1], X[,-1], y, k), y)
+  knn.error.df[rowcount,3] = prediction.error(myknn(X.test[,-1], X[,-1], y, k), y.test)
+  rowcount = rowcount + 1
+}
+
+error.plot = ggplot(data = melt(knn.error.df, id.vars='k'), aes(x=k, y=value, group=variable, color=variable)) +
+              geom_point() +
+              geom_line() +
+              scale_x_log10() +
+              scale_color_manual(values = c("blue","orange"))
 ```
