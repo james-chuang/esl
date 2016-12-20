@@ -187,6 +187,10 @@ plotknn = function(k){
 ```
 
 ```{r generate test data}
+train.linreg.yhat = X %*% beta.hat
+train.linreg.pred = ifelse(train.linreg.yhat>0.5, 1, 0)
+linreg.trainerr = sum(diag((table(y,train.linreg.pred)/length(y)) %*% matrix(c(0,1,1,0), ncol=2)))
+
 test = oracle(5000)
 
 X.test = as.matrix(cbind(rep(1, nrow(test$plotdata)), test$plotdata[,-3]))
