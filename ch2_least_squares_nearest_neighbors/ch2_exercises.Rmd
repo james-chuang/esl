@@ -28,7 +28,39 @@ The simulation draws $10$ points $p_1, \dots, p_{10} \in \mathbb{R}^2$ from $N\l
 $$
 \begin{align}
 P(\text{blue}) & = P(\text{orange}) \\
-\sum_i \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbb{x})\right)}
+\sum_i \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{p}_i)\right)} & = \sum_j \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{q}_j)\right)} \\
+\sum_i  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{p}_i)\right)} & = \sum_j  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{q}_j)\right)} \\
+
+\sum_i  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \left(\frac{5}{\mathbf{I}_2}\right) (\mathbf{x}-\mathbf{p}_i)\right)} & = \sum_j  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \left(\frac{5}{\mathbf{I}_2} \right) (\mathbf{x}-\mathbf{q}_j)\right)} \\
+
+\sum_i  \exp{\left( \frac{-5 \lVert \mathbf{p}_i -\mathbf{x}\rVert^2}{2}  \right)} & = \sum_j  \exp{\left( \frac{-5 \lVert \mathbf{q}_j -\mathbf{x}\rVert^2}{2}  \right)} \\
 
 \end{align}
 $$
+
+**Ex 2.3** Derive equation (2.24).
+
+Equation 2.24: Consider $N$ data points uniformly distributed in a $p$-dimensional unit ball centered at the origin. Suppose we consider a nearest-neighbor estimate at the origin. The median distance from the origin to the closest data point is given by the expression
+$$
+d(p,N) = \left(1-\frac{1}{2}^{\frac{1}{N}} \right)^{\frac{1}{p}}
+$$
+
+Let $r = \text{median distance}$.
+$$
+\begin{align}
+\frac{1}{2} & = P(\text{all } N \text{ points are further than } r \text{ from the origin})     & \text{definition of the median} \\
+\frac{1}{2} & = \prod_{i=1}^{N}P(\lVert x_i\rVert > r)                                          & \text{each point is assumed to be independent} \\
+\frac{1}{2} & = \prod_{i=1}^{N}\left[1-P\left(\lVert x_i\rVert \leq r \right) \right]                                                           \\
+\frac{1}{2} & = \prod_{i=1}^{N}\left[1-\frac{Kr^p}{K} \right]                                   & \text{volume of a }p\text{ dimensional hypersphere w/ radius } r                                       \\
+\frac{1}{2} & = \prod_{i=1}^{N} \left[1-r^p \right]             \\
+\frac{1}{2} & = \left(1-r^p \right)^N                           \\
+1-r^p & = \left(\frac{1}{2} \right)^{\frac{1}{N}}               \\
+r^p & = 1- \left(\frac{1}{2} \right)^{\frac{1}{N}}              \\
+r & = \left[1- \left(\frac{1}{2} \right)^{\frac{1}{N}} \right]^{\frac{1}{p}}
+\end{align}
+$$
+**Ex 2.4** The edge effect problem discussed on page 23 is not peculiar to uniform sampling from bounded domains. Consider inputs drawn from a spherical multinormal distribution $X \sim N(0, \mathbf{I}_p)$. The squared distance from any sample point to the origin has a $\chi_p^2$ distribution with mean $p$. Consider a prediction point $x_0$ drawn from this distribution, and let $a = x_0/\lVert x_0 \rVert$ be an associated unit vector. Let $z_i=a^T x_i$ be the projection of each of the training points on this direction.
+
+Show that the $z_i$ are distributed $N(0,1)$ with expected squared distance from the origin $1$, while the target point has expected squared distance $p$ from the origin.
+
+Hence for $p = 10$, a randomly drawn test point is about $3.1$ standard deviations from the origin, while all the training points are on average one standard deviation along direction $a$. So most prediction points see themselves as lying on the edge of the training set.

@@ -135,7 +135,35 @@ $(document).ready(function () {
 \end{align}
 \]</span></p>
 <p><strong>Ex 2.2</strong> Show how to compute the Bayes decision boundary for the simulation example in Figure 2.5.</p>
-<p>The simulation draws <span class="math inline">\(10\)</span> points <span class="math inline">\(p_1, \dots, p_{10} \in \mathbb{R}^2\)</span> from <span class="math inline">\(N\left(\begin{bmatrix}1 \\0 \end{bmatrix}, I_2 \right)\)</span> and 10 points <span class="math inline">\(q_1, \dots, q_{10} \in \mathbb{R}^2\)</span> from <span class="math inline">\(N \left(\begin{bmatrix}0 \\ 1 \end{bmatrix}, I_2 \right)\)</span></p>
+The simulation draws <span class="math inline">\(10\)</span> points <span class="math inline">\(p_1, \dots, p_{10} \in \mathbb{R}^2\)</span> from <span class="math inline">\(N\left(\begin{bmatrix}1 \\0 \end{bmatrix}, I_2 \right)\)</span> and 10 points <span class="math inline">\(q_1, \dots, q_{10} \in \mathbb{R}^2\)</span> from <span class="math inline">\(N \left(\begin{bmatrix}0 \\ 1 \end{bmatrix}, I_2 \right)\)</span>. These points <span class="math inline">\(p_i\)</span> and <span class="math inline">\(q_j\)</span> we assume to be fixed, and are used as the means of normal distributions with covariance matrix <span class="math inline">\(I_2/5\)</span>. The Bayes decision boundary is found by equating the likelihoods of a point being generated from the blue generating function and the orange generating function: $$
+<span class="math display">\[\begin{align}
+P(\text{blue}) &amp; = P(\text{orange}) \\
+\sum_i \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{p}_i)\right)} &amp; = \sum_j \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{q}_j)\right)} \\
+\sum_i  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{p}_i)\right)} &amp; = \sum_j  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{q}_j)\right)} \\
+
+\sum_i  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \left(\frac{5}{\mathbf{I}_2}\right) (\mathbf{x}-\mathbf{p}_i)\right)} &amp; = \sum_j  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \left(\frac{5}{\mathbf{I}_2} \right) (\mathbf{x}-\mathbf{q}_j)\right)} \\
+
+\sum_i  \exp{\left( \frac{-5 \lVert \mathbf{p}_i -\mathbf{x}\rVert^2}{2}  \right)} &amp; = \sum_j  \exp{\left( \frac{-5 \lVert \mathbf{q}_j -\mathbf{x}\rVert^2}{2}  \right)} \\
+
+\end{align}\]</span>
+<p>$$</p>
+<p><strong>Ex 2.3</strong> Derive equation (2.24).</p>
+<p>Equation 2.24: Consider <span class="math inline">\(N\)</span> data points uniformly distributed in a <span class="math inline">\(p\)</span>-dimensional unit ball centered at the origin. Suppose we consider a nearest-neighbor estimate at the origin. The median distance from the origin to the closest data point is given by the expression <span class="math display">\[
+d(p,N) = \left(1-\frac{1}{2}^{\frac{1}{N}} \right)^{\frac{1}{p}}
+\]</span></p>
+Let <span class="math inline">\(r = \text{median distance}\)</span>. $$
+<span class="math display">\[\begin{align}
+\frac{1}{2} &amp; = P(\text{all } N \text{ points are further than } r \text{ from the origin})     &amp; \text{definition of the median} \\
+\frac{1}{2} &amp; = \prod_{i=1}^{N}P(\lVert x_i\rVert &gt; r)                                          &amp; \text{each point is assumed to be independent} \\
+\frac{1}{2} &amp; = \prod_{i=1}^{N}\left[1-P\left(\lVert x_i\rVert \leq r \right) \right]                                                           \\
+\frac{1}{2} &amp; = \prod_{i=1}^{N}\left[1-\frac{Kr^p}{K} \right]                                   &amp; \text{volume of a }p\text{ dimensional hypersphere w/ radius } r                                       \\
+\frac{1}{2} &amp; = \prod_{i=1}^{N} \left[1-r^p \right]             \\
+\frac{1}{2} &amp; = \left(1-r^p \right)^N                           \\
+1-r^p &amp; = \left(\frac{1}{2} \right)^{\frac{1}{N}}               \\
+r^p &amp; = 1- \left(\frac{1}{2} \right)^{\frac{1}{N}}              \\
+r &amp; = \left[1- \left(\frac{1}{2} \right)^{\frac{1}{N}} \right]^{\frac{1}{p}}
+\end{align}\]</span>
+<p>$$</p>
 
 
 
