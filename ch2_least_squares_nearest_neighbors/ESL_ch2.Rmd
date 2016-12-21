@@ -11,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # **Two simple approaches to prediction: Least Squares and Nearest Neighbors**
 This post follows Chapter 2.3 in the [Elements of Statistical Learning](http://statweb.stanford.edu/~tibs/ElemStatLearn/). Note that the data for exactly reproducing the figures in the book are available in `mixture.example` from the R package `ElemStatLearn`, but here I'll be going through the example from scratch.
 
-This section develops the ***linear model fit by least squares*** and the ***$k$-nearest neighbor (kNN)*** prediction methods. The linear model makes large assumptions about the structure of the data, and yields stable but possibly inaccurate predictions (i.e., it is a relatively 'inflexible', or high-bias/low-variance prediction method). The kNN method makes mild structural assumptions-- its predictions are often accurate but can be unstable (i.e., it is a relatively 'flexible', or low-bias/high-variance prediction method).
+This section develops the ***linear model fit by least squares*** and the ***$\textbf{k}$-nearest neighbor (kNN)*** prediction methods. The linear model makes large assumptions about the structure of the data, and yields stable but possibly inaccurate predictions (i.e., it is a relatively 'inflexible', or high-bias/low-variance prediction method). The kNN method makes mild structural assumptions-- its predictions are often accurate but can be unstable (i.e., it is a relatively 'flexible', or low-bias/high-variance prediction method).
 
 First, I generate training data from a Gaussian mixture model as described in section 2.3.3:
 
-> First, we generated 10 means $m_k$ from a bivariate Gaussian distribution $N((1,0)^T, \mathbf{I})$ and labeled this class BLUE. Similarly, 10 more were drawn from $N((0,1)^T, \mathbf{I})$ and labeled class ORANGE. Then for each class we generated 100 observations as follows: for each observation, we picked an $m_k$ at random with probability $1/10$, and then generated a $N(m_k, \mathbf{I}/5)$, thus leading to a mixture of Gaussian clusters for each class.
+> First, we generated 10 means $m_k$ from a bivariate Gaussian distribution $N((1,0)^T, \mathbf{I})$ and labeled this class $\color{cornflowerblue}{\texttt{BLUE}}$. Similarly, 10 more were drawn from $N((0,1)^T, \mathbf{I})$ and labeled class $\color{darkorange}{\texttt{ORANGE}}$. Then for each class we generated 100 observations as follows: for each observation, we picked an $m_k$ at random with probability $1/10$, and then generated a $N(m_k, \mathbf{I}/5)$, thus leading to a mixture of Gaussian clusters for each class.
 
-```{r generate data as in ESL 2.3.3}
+```{r generate data as in ESL 2.3.3, fig.align='center'}
 library(MASS)
 library(tibble)
 library(reshape2)
@@ -50,12 +50,13 @@ oracle = function(npoints){
   return(list(plotdata = rbind(blue.data, og.data), meandata = rbind(blue.means, og.means)))
 }
 
+#generate training data wih 100 points of each color
 train = oracle(100)
 
-(a = ggplot(data = train$plotdata, aes(x=V1, y=V2)) +
-      geom_point(aes(color=color), size=2, shape=1) +
-      geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
-      scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+(a = ggplot() +
+      geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), shape=21, size=2, stroke=1) +
+      geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=3) +
+      scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
       xlab("X1") + ylab("X2"))
 ```
 
@@ -84,15 +85,15 @@ $$
 $$
 , and the fitted value at the $i$th input $x_i$ is $\hat y_i = \hat y(x_i) = x_i^T \hat \beta$. At an arbitrary input $x_0$ the prediction is $\hat y(x_0) = x_0^T \hat \beta$. The entire fitted surface is characterized by the $p$ parameters $\hat \beta$.
 
-Encode the output class variable $G$, which can take on the values BLUE or ORANGE, and encode it as a response $Y$ where $0$ is BLUE and $1$ is ORANGE. Then convert the fitted values $\hat Y$ to a fitted class variable $\hat G$ according to the rule:
+Encode the output class variable $G$, which can take on the values $\color{cornflowerblue}{\texttt{BLUE}}$ or $\color{darkorange}{\texttt{ORANGE}}$, and encode it as a response $Y$ where $0$ is $\color{cornflowerblue}{\texttt{BLUE}}$ and $1$ is $\color{darkorange}{\texttt{ORANGE}}$. Then convert the fitted values $\hat Y$ to a fitted class variable $\hat G$ according to the rule:
 $$
 \hat G = \begin{cases}
-        \text{ORANGE}  & \text{if } \hat Y > 0.5 \\
-        \text{BLUE}    & \text{if } \hat Y \leq 0.5
+        \color{darkorange}{\texttt{ORANGE}}  & \text{if } \hat Y > 0.5 \\
+        \color{cornflowerblue}{\texttt{BLUE}}    & \text{if } \hat Y \leq 0.5
         \end{cases}
 $$
 
-```{r linear model}
+```{r linear model, fig.align='center'}
 X = as.matrix(cbind(rep(1, nrow(train$plotdata)), train$plotdata[,-3]))
 y = ifelse(train$plotdata$color=="ORANGE", 1, 0)
 
@@ -119,15 +120,15 @@ linreg.pred = ifelse(linreg.yhat>0.5,"ORANGE","BLUE")
 linreg.plotdata = cbind(x.new, linreg.pred)
 
 (b = ggplot() +
-      geom_point(data = linreg.plotdata, aes(x=V1, y=V2, color=linreg.pred), size=0.8) +
-      geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), size=2, shape=1) +
+      geom_point(data = linreg.plotdata, aes(x=V1, y=V2, color=linreg.pred), size=0.05) +
+      geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), shape=21, size=2, stroke=1) +
       geom_abline(slope = -beta.hat[2]/beta.hat[3], intercept = (.5-beta.hat[1])/beta.hat[3], color="black") +
       #geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=3) +
-      scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+      scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
       xlab("X1") + ylab("X2"))
 ```
 
-```{r calculate bayes error rate}
+```{r calculate bayes error rate, fig.align='center'}
 
 mybayes = function(xnew,means){
   bayes.df = data_frame(pblue=numeric(nrow(xnew)), pog=numeric(nrow(xnew)))
@@ -143,12 +144,13 @@ mybayes = function(xnew,means){
 grid.bayes = mybayes(x.new, train$meandata)
 
 (bayes.plot = ggplot() +
-                geom_point(data = grid.bayes, aes(x=V1, y=V2, color=color), size=0.8) +
-                geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), size=2, shape=1) +
-                geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
-                scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+                geom_point(data = grid.bayes, aes(x=V1, y=V2, color=color), size=0.05) +
+                geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), shape=21, size=2, stroke=1) +
+                #geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
+                scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
                 xlab("X1") + ylab("X2"))
 ```
+
 ## **predict using nearest-neighbor methods**
 
 The $k$-nearest neighbor fit for $\hat Y$ is defined as follows:
@@ -158,7 +160,7 @@ $$
 
 , where $N_k(x)$ is the neighborhood of $x$ defined by the $k$ closest points $x_i$ in the training sample, defined by Euclidean distance.
 
-```{r}
+```{r, fig.align='center'}
 #knn classification function:
 #   inputs: xnew- a matrix of new x values to be classified
 #           x- matrix of training inputs
@@ -192,10 +194,10 @@ plotknn = function(k){
   boundary.data = as_data_frame(cbind(x.new, knn.yhat))
     
   c = ggplot() +
-        geom_point(data=knn.plotdata, aes(x=V1, y=V2, color=knn.pred), size=.8) +
-        geom_point(data=train$plotdata, aes(x=V1,y=V2, color=color), shape=1, size=2) +
+        geom_point(data=knn.plotdata, aes(x=V1, y=V2, color=knn.pred), size=0.05) +
+        geom_point(data=train$plotdata, aes(x=V1,y=V2, color=color), shape=21, size=2, stroke=1) +
         geom_contour(data=boundary.data, aes(x=V1,y=V2,z=knn.yhat), bins=1, color="black") +
-        scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+        scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
         ggtitle(paste(k, "nn"))
   return(c)
 }
@@ -204,7 +206,7 @@ plotknn = function(k){
 (d = plotknn(k=15))
 ```
 
-```{r generate test data}
+```{r generate test data, eval=FALSE, fig.align='center'}
 train.linreg.yhat = X %*% beta.hat
 train.linreg.pred = ifelse(train.linreg.yhat>0.5, 1, 0)
 linreg.trainerr = prediction.error(y, train.linreg.pred)
@@ -243,7 +245,7 @@ for (k in kvector){
               geom_point() +
               geom_line() +
               scale_x_log10() +
-              scale_color_manual(values = c("blue","orange")) +
+              scale_color_manual(values = c("#2F4F4F","#AE0C00")) +
               geom_hline(yintercept = bayes.error)
   
 )
