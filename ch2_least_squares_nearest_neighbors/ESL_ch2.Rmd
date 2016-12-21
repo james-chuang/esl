@@ -22,6 +22,7 @@ library(MASS)
 library(tibble)
 library(reshape2)
 library(ggplot2)
+library(mvtnorm)
 
 oracle = function(npoints){
   #set mean vectors for blue and orange m_k:
@@ -126,6 +127,28 @@ linreg.plotdata = cbind(x.new, linreg.pred)
       xlab("X1") + ylab("X2"))
 ```
 
+```{r calculate bayes error rate}
+
+mybayes = function(xnew,means){
+  bayes.df = data_frame(pblue=numeric(nrow(xnew)), pog=numeric(nrow(xnew)))
+  for (i in 1:10){
+    bayes.df$pblue = bayes.df$pblue + dmvnorm(x=xnew, mean=as.vector(as.numeric(means[i,1:2])), sigma = diag(2)/5)
+    bayes.df$pog = bayes.df$pog + dmvnorm(x=xnew, mean=as.vector(as.numeric(means[i+10,1:2])), sigma = diag(2)/5)
+  }
+  bayes.df$prediction = ifelse(bayes.df$pog>bayes.df$pblue, "ORANGE", "BLUE")
+  bayes.plotdata = cbind(xnew, bayes.df$prediction)
+  names(bayes.plotdata)[3] = "color"
+  return(bayes.plotdata)
+}
+grid.bayes = mybayes(x.new, train$meandata)
+
+(bayes.plot = ggplot() +
+                geom_point(data = grid.bayes, aes(x=V1, y=V2, color=color), size=0.8) +
+                geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), size=2, shape=1) +
+                geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
+                scale_color_manual(values= c("#2415CC","#FF8234"), guide=FALSE) +
+                xlab("X1") + ylab("X2"))
+```
 ## **predict using nearest-neighbor methods**
 
 The $k$-nearest neighbor fit for $\hat Y$ is defined as follows:
@@ -184,7 +207,6 @@ plotknn = function(k){
 ```{r generate test data}
 train.linreg.yhat = X %*% beta.hat
 train.linreg.pred = ifelse(train.linreg.yhat>0.5, 1, 0)
-#linreg.trainerr = sum(diag((table(y,train.linreg.pred)/length(y)) %*% matrix(c(0,1,1,0), ncol=2)))
 linreg.trainerr = prediction.error(y, train.linreg.pred)
 
 test = oracle(5000)
@@ -197,12 +219,15 @@ test.beta.hat = mylm(X.test, y.test)
 test.linreg.yhat = X.test %*% test.beta.hat
 test.linreg.pred = ifelse(test.linreg.yhat>0.5, 1, 0)
 
-#linreg.testerr = sum(diag((table(y.test,test.linreg.pred)/length(y.test)) %*% matrix(c(0,1,1,0), ncol=2)))
 linreg.testerr = prediction.error(y.test, test.linreg.pred)
+
+#calculate Bayes error
+bayes.error = prediction.error(ifelse(mybayes(as_data_frame(X[,-1]), train$meandata)[,3]=="ORANGE",1,0 ), y)
 
 
 #calculate training and test errors for KNN
 kvector = c(1,3,5,7,11,21,31,45,69,101,151)
+#kvector = c(1,5,10)
 
 knn.error.df = data_frame(k = integer(), trainerr = double(), testerr = double())
 
@@ -218,6 +243,8 @@ for (k in kvector){
               geom_point() +
               geom_line() +
               scale_x_log10() +
-              scale_color_manual(values = c("blue","orange"))
+              scale_color_manual(values = c("blue","orange")) +
+              geom_hline(yintercept = bayes.error)
+  
 )
 ```
