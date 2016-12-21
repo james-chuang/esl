@@ -131,7 +131,8 @@ Y = X \beta + \epsilon
 \]</span></p>
 <p><span class="math display">\[
 \mathbf{r} = \mathbf{y}- \mathbf{x} \hat \beta
-\]</span> . This simple univariate regression provides the building block for multiple linear regression. Suppose next that the inputs <span class="math inline">\(\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_p\)</span> (the columns of the data matrix <span class="math inline">\(X\)</span>) are orthogonal, i.e. <span class="math inline">\(\langle \mathbf{x}_j,\mathbf{x}_k \rangle = 0\)</span> for all <span class="math inline">\(j \neq k\)</span>. Then, the multiple least squares estimates <span class="math inline">\(\hat \beta_j\)</span> are equal to the univariate estimates <span class="math inline">\(\langle \mathbf{x}_j, \mathbf{y}\rangle/ \langle \mathbf{x}_j, \mathbf{x}_j \rangle\)</span>: <span class="math display">\[
+\]</span> . This simple univariate regression provides the building block for multiple linear regression. Suppose next that the inputs <span class="math inline">\(\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_p\)</span> (the columns of the data matrix <span class="math inline">\(X\)</span>) are orthogonal, i.e. <span class="math inline">\(\langle \mathbf{x}_j,\mathbf{x}_k \rangle = 0\)</span> for all <span class="math inline">\(j \neq k\)</span>. Then, the multiple least squares estimates <span class="math inline">\(\hat \beta_j\)</span> are equal to the univariate estimates <span class="math inline">\(\langle \mathbf{x}_j, \mathbf{y}\rangle/ \langle \mathbf{x}_j, \mathbf{x}_j \rangle\)</span>:</p>
+<p><span class="math display">\[
 \begin{align}
 \hat \beta &amp; = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
 \hat \beta &amp; =  \left(\begin{bmatrix}
@@ -197,9 +198,12 @@ Y = X \beta + \epsilon
               \end{bmatrix} \\
 \end{align}
 \]</span> I.e., when the inputs are orthogonal, they have no effect on each other’s parameter estimates in the model.</p>
-Orthogonal inputs occur most often with balanced, designed experiments where orthogonality is enforced, but almost never with observational data. Hence we will have to orthogonalize them to carry this idea further. Suppose next that we have an intercept and a single input <span class="math inline">\(\mathbf{x}\)</span>, i.e. <span class="math inline">\(\mathbf{y} = \beta_o + \beta_1 \mathbf{x}\)</span>. Then the least squares coefficient of <span class="math inline">\(x\)</span> has the form <span class="math display">\[
+<p>Orthogonal inputs occur most often with balanced, designed experiments where orthogonality is enforced, but almost never with observational data. Hence we will have to orthogonalize them to carry this idea further. Suppose next that we have an intercept and a single input <span class="math inline">\(\mathbf{x}\)</span>, i.e. <span class="math inline">\(\mathbf{y} = \beta_o + \beta_1 \mathbf{x}\)</span>. Then the least squares coefficient of <span class="math inline">\(x\)</span> has the form</p>
+<p><span class="math display">\[
 \hat \beta_1 = \frac{\langle \mathbf{x}- \bar x \mathbf{1} , \mathbf{y}\rangle}{\langle \mathbf{x}- \bar x \mathbf{1} , \mathbf{x}- \bar x \mathbf{1}\rangle}
-\]</span> , where <span class="math inline">\(\bar x = \sum_i x_i/N\)</span>, and <span class="math inline">\(\mathbf{1} = \mathbf{x}_0\)</span>, the vector of <span class="math inline">\(N\)</span> ones. $$
+\]</span></p>
+<p>, where <span class="math inline">\(\bar x = \sum_i x_i/N\)</span>, and <span class="math inline">\(\mathbf{1} = \mathbf{x}_0\)</span>, the vector of <span class="math inline">\(N\)</span> ones.</p>
+$$
 <span class="math display">\[\begin{align}
 \hat \beta  &amp; = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
             &amp; = \left(\begin{bmatrix}
@@ -285,7 +289,8 @@ Orthogonal inputs occur most often with balanced, designed experiments where ort
                     0             &amp; 0             &amp; \cdots  &amp; \gamma_{p,p}  
                     \end{bmatrix}
 \]</span></p>
-Introducing the diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> with <span class="math inline">\(j\)</span>th diagonal entry <span class="math inline">\(D_{j,j} = \lVert \mathbf{z}_j \rVert\)</span>, we get: $$
+<p>Introducing the diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> with <span class="math inline">\(j\)</span>th diagonal entry <span class="math inline">\(D_{j,j} = \lVert \mathbf{z}_j \rVert\)</span>, we get:</p>
+$$
 <span class="math display">\[\begin{align}
 \mathbf{X}  &amp; = \mathbf{ZD}^{-1}\mathbf{D \Gamma} \\
             &amp; = \mathbf{QR}
@@ -295,10 +300,18 @@ Introducing the diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> 
 <p>, the so-called <span class="math inline">\(QR\)</span> decomposition of <span class="math inline">\(\mathbf{X}\)</span>. Here <span class="math inline">\(\mathbf{Q}\)</span> is an <span class="math inline">\(N \times (p + 1)\)</span> orthogonal matrix, <span class="math inline">\(\mathbf{Q}^T \mathbf{Q}=\mathbf{I}\)</span>, and <span class="math inline">\(\mathbf{R}\)</span> is a <span class="math inline">\((p+1) \times (p+1)\)</span> upper triangular matrix.</p>
 <p>The <span class="math inline">\(\mathbf{QR}\)</span> decomposition represents a convenient orthogonal basis for the column space of <span class="math inline">\(\mathbf{X}\)</span>. For example, the least squares solution is given by: <span class="math display">\[
 \begin{align}
-\hat\beta       &amp; = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}, \\
-\hat{\mathbf{y}} &amp; = \mathbf{QQ}^T\mathbf{y}
+\hat\beta         &amp; = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
+                  &amp; = \left[(\mathbf{QR})^T(\mathbf{QR}) \right]^{-1} (\mathbf{QR})^T \mathbf{y} \\
+                  &amp; = \left[\mathbf{R}^T \mathbf{Q}^T \mathbf{Q} \mathbf{R}\right]^{-1} \mathbf{R}^T \mathbf{Q}^T \mathbf{y} \\
+                  &amp; = \mathbf{R}^{-1}\left(\mathbf{R}^T\right)^{-1} \mathbf{R}^T \mathbf{Q}^T \mathbf{y}\\
+\hat\beta         &amp; = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}, \\
+                  \\
+\hat{\mathbf{y}}  &amp; = \mathbf{X}\hat \beta \\
+                  &amp; = \left(\mathbf{QR}\right)\left(\mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y} \right) \\
+\hat{\mathbf{y}}  &amp; = \mathbf{QQ}^T\mathbf{y}
 \end{align}
 \]</span></p>
+<p><span class="math inline">\(\hat\beta = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}\)</span> is easy to solve because <span class="math inline">\(\mathbf{R}\)</span> is upper triangular.</p>
 </div>
 
 

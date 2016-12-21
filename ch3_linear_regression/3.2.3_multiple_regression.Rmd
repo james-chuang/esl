@@ -27,6 +27,7 @@ $$
 \mathbf{r} = \mathbf{y}- \mathbf{x} \hat \beta
 $$
 . This simple univariate regression provides the building block for multiple linear regression. Suppose next that the inputs $\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_p$ (the columns of the data matrix $X$) are orthogonal, i.e. $\langle \mathbf{x}_j,\mathbf{x}_k \rangle = 0$ for all $j \neq k$. Then, the multiple least squares estimates $\hat \beta_j$ are equal to the univariate estimates $\langle \mathbf{x}_j, \mathbf{y}\rangle/ \langle \mathbf{x}_j, \mathbf{x}_j \rangle$:
+
 $$
 \begin{align}
 \hat \beta & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
@@ -96,10 +97,14 @@ $$
 I.e., when the inputs are orthogonal, they have no effect on each other's parameter estimates in the model.
 
 Orthogonal inputs occur most often with balanced, designed experiments where orthogonality is enforced, but almost never with observational data. Hence we will have to orthogonalize them to carry this idea further. Suppose next that we have an intercept and a single input $\mathbf{x}$, i.e. $\mathbf{y} = \beta_o + \beta_1 \mathbf{x}$. Then the least squares coefficient of $x$ has the form
+
 $$
 \hat \beta_1 = \frac{\langle \mathbf{x}- \bar x \mathbf{1} , \mathbf{y}\rangle}{\langle \mathbf{x}- \bar x \mathbf{1} , \mathbf{x}- \bar x \mathbf{1}\rangle}
 $$
+
 , where $\bar x = \sum_i x_i/N$, and $\mathbf{1} = \mathbf{x}_0$, the vector of $N$ ones.
+
+
 $$
 \begin{align}
 \hat \beta  & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
@@ -140,6 +145,7 @@ $$
         & = \frac{\langle \mathbf{x}- \bar x \mathbf{1}, \mathbf{y}\rangle}{\langle \mathbf{x}- \bar x \mathbf{1},\mathbf{x}- \bar x \mathbf{1}\rangle}
 \end{align}
 $$
+
 
 We can view this estimate as the result of two applications of the simple regression. The steps are:
 
@@ -198,6 +204,7 @@ $$
 $$
 
 Introducing the diagonal matrix $\mathbf{D}$ with $j$th diagonal entry $D_{j,j} = \lVert \mathbf{z}_j \rVert$, we get:
+
 $$
 \begin{align}
 \mathbf{X}  & = \mathbf{ZD}^{-1}\mathbf{D \Gamma} \\
@@ -205,6 +212,7 @@ $$
 
 \end{align}
 $$
+
 , the so-called $QR$ decomposition of $\mathbf{X}$. Here $\mathbf{Q}$ is an $N \times (p + 1)$ orthogonal matrix, $\mathbf{Q}^T \mathbf{Q}=\mathbf{I}$, and $\mathbf{R}$ is a $(p+1) \times (p+1)$ upper triangular matrix.
 
 The $\mathbf{QR}$ decomposition represents a convenient orthogonal basis for the column space of $\mathbf{X}$. For example, the least squares solution is given by:
