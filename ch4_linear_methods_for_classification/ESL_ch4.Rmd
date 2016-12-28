@@ -1,0 +1,84 @@
+---
+output:
+  html_document:
+    toc: TRUE
+    fig_width: 4.5
+    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+---
+
+## **4.1 Introduction**
+
+Linear methods of classification-- those where the *decision boundaries* between classes are linear.
+
+Several different ways to find linear decision boundaries:
+
+  - fit a linear regression model to the class indicator variables, and classify to the largest fit (Ch. 2)
+      - Suppose there are $K$ classes, labeled $1,2,\dots,K$, and the fitted linear model for the $k$th indicator response variable is $\hat f_k(x) = \hat \beta_{k0} + \hat \beta_{k}^Tx$. The decision boundary between class $k$ and $l$ is that set of points for which $\hat f_k(x) = \hat f_\ell(x)$.
+      - This regression approach is a member of a class of methods that model ***discriminant functions*** $\delta_k(x)$ for each class, and then classify $x$ to the class with the largest value for its discriminant function.
+          - Methods that model the posterior probabilities $P(G=k \mid X=x)$ are also in this class. If either the $\delta_k(x)$ or $P(G=k \mid X=x)$ are linear in $x$, then the decision boundaries will be linear.
+              - This remains true for monotone transformations of $\delta_k(x)$ or $P(G=k \mid X=x)$. For example, in two-class classification, a popular model for the posterior probabilities is
+              $$
+              \begin{align}
+              P(G=1 \mid X=x) & = \frac{\exp \left(\beta_0 + \beta^T x \right)}{1+ \exp \left(\beta_0 + \beta^T x \right)}, \\
+              P(G=2 \mid X=x) & = \frac{1}{1+\exp \left(\beta_0 + \beta^T x \right)}
+              \end{align}
+              $$
+              - The monotone transformation used here is the ***logit*** transformation: $\log \left[\frac{p}{1-p} \right]$ (the inverse of the logistic sigmoid function)
+              $$
+              \log \frac{P(G=1 \mid X=x)}{P(G=2 \mid X=x)} = \beta_0 + \beta^T x
+              $$.
+              Here the decision boundary is the set of points for which the *log-odds* are zero.
+              - Two popular but different methods resulting in linear log-odds or logits: ***linear discriminant analysis*** and ***linear logistic regression***. The essential difference between the two is in the way the linear function is fit to the training data.
+      - A more direct approach: explicitly model the boundaries between the classes as linear. For two classes, this amounts fo modeling the decision boundary as a hyperplane. Two methods for this: the ***perceptron*** model, which finds a separating hyperplane in the data, if it exists, and a method for finding an ***optimally separating hyperplane*** if one exists, or else a hyperplane that minimizes some measure of overlap in the training data.
+      - The linear approaches in this chapter can be generalized with basis expansions.
+      
+## **4.2 Linear Regression of an Indicator Matrix**
+
+Code response in an ***indicator response matrix*** $\mathbf{Y}$, an $N \times K$ matrix of $N$ training instances, where $Y_k = 1$ if $G = k$, else $0$. Fit a linear regression model to each of the columns of $\mathbf{Y}$ simultaneously. The fit is given by
+$$
+\hat{\mathbf{Y}} = \mathbf{X}\left(\mathbf{X}^T \mathbf{X} \right)^{-1} \mathbf{X}^T \mathbf{Y}
+$$
+, where the $(p+1) \times K$ coefficient matrix $\mathbf{B} = \left(\mathbf{X}^T \mathbf{X} \right)^{-1} \mathbf{X}^T \mathbf{Y}$.
+
+A new observation with input $x$ is classified as follows:
+  
+  - compute the fitted output $\hat f(x)^T = (1, x^T)\hat{\mathbf{B}}$, a $K$ vector;
+  - identify the largest component and classify accordingly:
+  $$
+  \hat{G}(x) = \text{argmax}_{k \in G} \hat f_k(x)
+  $$
+  
+?????????????????????
+pg.104
+
+
+## **4.3 Linear Discriminant Analysis**
+Decision theory for classification says that we need to know the class posteriors $P(G\mid X)$ for optimal classification. Suppose $f_k(x)$ is the class-conditional probability density of $X$ in class $G=k$ (i.e. $P(X \mid G) = f_k(x)$), and let $\pi_k$ be the prior probability of class $k$, with $\sum_{k=1}^K \pi_k = 1$. Applying Bayes rule:
+$$
+P(G=k \mid X =x) = \frac{f_k(x) \pi_k}{\sum_{\ell = 1}^K f_{\ell}(x)\pi_{\ell}}
+$$
+In terms of ability to classify, having $f_k(x)$ is almost equivalent to having the quantity $P(G=k \mid X=x)$. Many techniques are based on models for the class densities $f_k(x)$:
+
+- linear and quadratic discriminant analysis: $f_k(x)$ are Gaussian
+- flexible mixtures of Gaussians allow nonlinear decision boundaries
+- nonparametric density estimates for each class density allow the most flexibility
+- ***Naive Bayes*** models are a variant of the previous case, and assume that each of the class densities are products of marginal densities; i.e., they assume that the inputs are conditionally independent in each class
+
+Suppose that we model each class density as multivariate Gaussian:
+$$
+f_k(x) = \frac{1}{(2 \pi)^\frac{p}{2} \lvert \Sigma_k \rvert^{\frac{1}{2}}}e^{- \frac{1}{2}(x-\mu_k)^T \Sigma_k^{-1}(x-\mu_k)}
+$$
+Linear discriminant analysis (LDA) arises in the special case when we assume that the classes have a common covariance matrix $\Sigma_k = \Sigma  \forall k$. In comparing two classes $k$ and $l$, it is sufficient to look at the log-ratio:
+
+$$
+\begin{align}
+& \qquad \log \frac{P(G=k \mid X=x)}{P(G=k \mid X=x)}  \\
+& = \log \frac{f_k(x) \pi_k}{f_\ell(x) \pi_\ell} \\
+                                              & = \log \frac{f_k(x)}{f_\ell(x)} + \log \frac{\pi_k}{\pi_\ell} \\
+                                              & = \log \frac{\pi_k}{\pi_\ell} + \log \frac{e^{- \frac{1}{2}(x-\mu_k)^T \Sigma^{-1}(x-\mu_k)}}{(2 \pi)^\frac{p}{2} \lvert \Sigma \rvert^{\frac{1}{2}}} \frac{(2 \pi)^\frac{p}{2} \lvert \Sigma \rvert^{\frac{1}{2}}}{e^{- \frac{1}{2}(x-\mu_\ell)^T \Sigma^{-1}(x-\mu_\ell)}} \qquad \text{Normalization factors cancel} \\
+                                              & = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}\left(x-\mu_k \right)^T \Sigma^{-1}\left(x-\mu_k \right) + \frac{1}{2} \left(x-\mu_\ell \right)^T \Sigma^{-1} \left(x-\mu_\ell \right) \\
+                                              & = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}x^T\Sigma^{-1}x + x^T \Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T \Sigma^{-1} \mu_k + \frac{1}{2}x^T\Sigma^{-1}x - x^T \Sigma^{-1}\mu_\ell + \frac{1}{2} \mu_\ell^T \Sigma^{-1} \mu_\ell \quad \text{Quadratic parts cancel}\\
+                                              & = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}\left(\mu_k-\mu_\ell \right)^T \Sigma^{-1}\left(\mu_k-\mu_\ell \right) + x^T \Sigma^{-1}(\mu_k - \mu_\ell)
+\end{align}
+$$
+This equation for log-odds is linear in $x$, implying that the decision boundary between $k$ and $l$ is linear in $x$, and in $p$ dimensions is a hyperplane.

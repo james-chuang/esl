@@ -1,0 +1,39 @@
+---
+output:
+  html_document:
+    toc: TRUE
+    fig_width: 4.5
+    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+---
+
+# **Bias-variance decomposition**
+
+From ESL pg. 23:
+
+Suppose we have 1000 training examples $x_i$ generated uniformly on $[-1,1]^p$. Assume that the true relationship between $X$ and $Y$ is
+$$
+Y = f(X) = e^{-8 \lVert X\rVert^2}
+$$
+, without any measurement error. We use the 1-nearest neighbor rule to predict $y_0$ at the test-point $x_0=0$. Denote the training set by $\tau$. We can then compute the expected prediction error at $x_0$ for our procedure, averaging over all such samples of size 1000. Since the problem is deterministic, this is the mean squared error (MSE) for estimating $f(0)$:
+$$
+\begin{align}
+\text{MSE}(x_0) & = \text{E}_\tau\left[f(x_0) - \hat y_0 \right]^2 \\
+                & = \text{E}_\tau\left[\hat y_0 - f(x_0) \right]^2 \\
+                & = \text{E}_\tau\left[\hat y_0 - \text{E}_\tau\left[\hat y_0 \right] + \text{E}_\tau\left[\hat y_0 \right] -\hat y_0 \right]^2 \\
+                & = \text{E}_\tau\left[y_0 - \text{E}_\tau[\hat y_0] \right]^2 + 2\text{E}_\tau\left[\left(\hat y_0-\text{E}_\tau[\hat y_0] \right)\left(\text{E}_\tau\left[\hat y_0 \right] - f(x_0) \right) \right] + \text{E}_\tau\left[\text{E}_\tau\left[\hat y_0 \right] - f(x_0)\right]^2 \\
+                & = \text{Var}_\tau(\hat y_0) + 2\text{E}_\tau\left[\left(\hat y_0-f(x_0) \right)\left(f(x_0) - f(x_0) \right) \right] + \text{Bias}_{\tau}^2(\hat y_0)\\
+                & = \text{Var}_\tau(\hat y_0) + \text{Bias}_{\tau}^2(\hat y_0)
+\end{align}
+$$
+
+Another way:
+$$
+\begin{align}
+\text{MSE}(x_0) & = \text{E}_\tau\left[f(x_0) - \hat y_0 \right]^2 \\
+                & = \text{E}_\tau\left[f^2(x_0) -2f(x_0)\hat y_0 + \hat y_0^2\right] \\
+                & = \text{E}_\tau\left[f^2(x_0) \right] - \text{E}_\tau \left[2f(x_0)\hat y_0 \right] + \text{E}_\tau \left[\hat y_0 \right] \\
+                & = \text{Var}_\tau(f(x_0)) + \left(\text{E}_\tau \left[f(x_0) \right] \right)^2 - 2f(x_0)\text{E}_\tau \left[\hat y_0 \right] + \text{Var}_\tau(\hat y_0) + \left(\text{E}_\tau \left[\hat y_0 \right] \right)^2 \\
+                & = \text{Var}_\tau\left(f(x_0) \right) + \text{Var}_\tau(\hat y_0) + \left[\text{E}_\tau (\hat y_0 - f(x_0))\right]^2 \\
+                & = \sigma^2 + \text{Var}_\tau(\hat y_0) + \text{Bias}^2(y_0)
+\end{align}
+$$
