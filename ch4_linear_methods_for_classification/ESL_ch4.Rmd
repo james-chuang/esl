@@ -82,3 +82,47 @@ $$
 \end{align}
 $$
 This equation for log-odds is linear in $x$, implying that the decision boundary between $k$ and $l$ is linear in $x$, and in $p$ dimensions is a hyperplane.
+
+In practice the parameters of the generating Gaussians are unknown, and need to be estimated from the training data:
+
+- $\hat \pi_k = N_k/N$, where $N_k$ is the number of class-$k$ observations;
+- $\hat \mu_k = \sum_{g_i = k} x_i/N_k$;
+- $\hat{\mathbf{\Sigma}} = \sum_{k=1}^k\sum_{g_i=k} \left(x_i - \hat\mu_k \right) \left(x_i - \hat\mu_k \right)^T/\left(N-K \right)$
+
+QDA arises in the case that the classes do not have common covariance matrices, and thus the quadratic term in the discriminant function does not cancel.
+?????????????
+
+## **4.4 Logistic Regression**
+Logistic regression- model the posterior probabiltiies of the $K$ classes via lienar functions in $x$, while ensuring that they sum to one and remain in $[0,1]$ (so that they can be interepreted as probabiltiies). The model:
+$$
+\begin{align}
+\log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{10} + \beta_1^Tx \\
+\log\frac{P(G=2 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{20} + \beta_2^Tx \\
+                                            & \vdots                    \\
+\log\frac{P(G=K-1 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{(K-1)0} + \beta_{K-1}^Tx
+\end{align}
+$$
+The model is specified in terms of $K-1$ log-odds or logit transformations (reflecting the constraint that the probabilities sum to one, so the $K$th probability is determined by the previous $K-1$). From the log-odds above, we can calculate the probability of the last ($K$th) class:
+$$
+\begin{align}
+P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=\ell \mid X=x) \\
+P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=k \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) & = 1-P(G=k \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) \left[1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \right] & = 1 \\
+P(G=K \mid X=x) & = \frac{1}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
+\end{align}
+$$
+and the probability for any class $k$:
+$$
+\begin{align*}
+P(G=k \mid X=x) & = P(G=K \mid X=x) \exp\left(\beta_{k0}+ \beta_k^Tx \right) \\
+P(G=k \mid X=x) & = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
+\end{align*}
+$$
+These probabilities sum to one as expected. The model uses the last class $K$ as the denominator in the odds-ratios, however, the choice of the class to use as the denominator is arbitrary in that the estimates don't change by this choice. To emphasize the dependence on the entire parameter set $\theta = \{\beta_{10}, \beta_1^T, \dots, \beta_{(K-1)0}, \beta_{K-1}^T\}$, we denote the probabilities $P(G=k \mid X=x) = p_k(x;\theta)$.
+
+There is no closed form solution for the coefficients $\theta$, so logistic regression models are usually fit by maximum likelihood, using the conditional likelihood of $G$ given $X$. Since $P(G \mid X)$ completely specifies the conditional distribution, the *multinomial* distribution is appropriate. The log-likelihood for $N$ observations is
+$$
+\ell(\theta) = \sum_{i=1}^N \log p_{g_i}(x_i; \theta)
+$$
+, where $p_k(x_i; \theta) = P(G=k \mid X=x_i; \theta)$.

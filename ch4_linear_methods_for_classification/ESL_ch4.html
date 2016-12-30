@@ -124,6 +124,7 @@ $(document).ready(function () {
 <li><a href="#introduction"><strong>4.1 Introduction</strong></a></li>
 <li><a href="#linear-regression-of-an-indicator-matrix"><strong>4.2 Linear Regression of an Indicator Matrix</strong></a></li>
 <li><a href="#linear-discriminant-analysis"><strong>4.3 Linear Discriminant Analysis</strong></a></li>
+<li><a href="#logistic-regression"><strong>4.4 Logistic Regression</strong></a></li>
 </ul>
 </div>
 
@@ -194,7 +195,39 @@ f_k(x) = \frac{1}{(2 \pi)^\frac{p}{2} \lvert \Sigma_k \rvert^{\frac{1}{2}}}e^{- 
                                               &amp; = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}x^T\Sigma^{-1}x + x^T \Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T \Sigma^{-1} \mu_k + \frac{1}{2}x^T\Sigma^{-1}x - x^T \Sigma^{-1}\mu_\ell + \frac{1}{2} \mu_\ell^T \Sigma^{-1} \mu_\ell \quad \text{Quadratic parts cancel}\\
                                               &amp; = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}\left(\mu_k-\mu_\ell \right)^T \Sigma^{-1}\left(\mu_k-\mu_\ell \right) + x^T \Sigma^{-1}(\mu_k - \mu_\ell)
 \end{align}
-\]</span></p>
+\]</span> This equation for log-odds is linear in <span class="math inline">\(x\)</span>, implying that the decision boundary between <span class="math inline">\(k\)</span> and <span class="math inline">\(l\)</span> is linear in <span class="math inline">\(x\)</span>, and in <span class="math inline">\(p\)</span> dimensions is a hyperplane.</p>
+<p>In practice the parameters of the generating Gaussians are unknown, and need to be estimated from the training data:</p>
+<ul>
+<li><span class="math inline">\(\hat \pi_k = N_k/N\)</span>, where <span class="math inline">\(N_k\)</span> is the number of class-<span class="math inline">\(k\)</span> observations;</li>
+<li><span class="math inline">\(\hat \mu_k = \sum_{g_i = k} x_i/N_k\)</span>;</li>
+<li><span class="math inline">\(\hat{\mathbf{\Sigma}} = \sum_{k=1}^k\sum_{g_i=k} \left(x_i - \hat\mu_k \right) \left(x_i - \hat\mu_k \right)^T/\left(N-K \right)\)</span></li>
+</ul>
+<p>QDA arises in the case that the classes do not have common covariance matrices, and thus the quadratic term in the discriminant function does not cancel. ?????????????</p>
+</div>
+<div id="logistic-regression" class="section level2">
+<h2><strong>4.4 Logistic Regression</strong></h2>
+<p>Logistic regression- model the posterior probabiltiies of the <span class="math inline">\(K\)</span> classes via lienar functions in <span class="math inline">\(x\)</span>, while ensuring that they sum to one and remain in <span class="math inline">\([0,1]\)</span> (so that they can be interepreted as probabiltiies). The model: <span class="math display">\[
+\begin{align}
+\log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{10} + \beta_1^Tx \\
+\log\frac{P(G=2 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{20} + \beta_2^Tx \\
+                                            &amp; \vdots                    \\
+\log\frac{P(G=K-1 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{(K-1)0} + \beta_{K-1}^Tx
+\end{align}
+\]</span> The model is specified in terms of <span class="math inline">\(K-1\)</span> log-odds or logit transformations (reflecting the constraint that the probabilities sum to one, so the <span class="math inline">\(K\)</span>th probability is determined by the previous <span class="math inline">\(K-1\)</span>). From the log-odds above, we can calculate the probability of the last (<span class="math inline">\(K\)</span>th) class: <span class="math display">\[
+\begin{align}
+P(G=K \mid X=x) &amp; = 1-\sum_{\ell=1}^{K-1}P(G=\ell \mid X=x) \\
+P(G=K \mid X=x) &amp; = 1-\sum_{\ell=1}^{K-1}P(G=k \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) &amp; = 1-P(G=k \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) \left[1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \right] &amp; = 1 \\
+P(G=K \mid X=x) &amp; = \frac{1}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
+\end{align}
+\]</span> and the probability for any class <span class="math inline">\(k\)</span>: <span class="math display">\[
+\begin{align*}
+P(G=k \mid X=x) &amp; = P(G=K \mid X=x) \exp\left(\beta_{k0}+ \beta_k^Tx \right) \\
+P(G=k \mid X=x) &amp; = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
+\end{align*}
+\]</span> These probabilities sum to one as expected. The model uses the last class <span class="math inline">\(K\)</span> as the denominator in the odds-ratios, however, the choice of the class to use as the denominator is arbitrary in that the estimates don’t change by this choice. To emphasize the dependence on the entire parameter set <span class="math inline">\(\theta = \{\beta_{10}, \beta_1^T, \dots, \beta_{(K-1)0}, \beta_{K-1}^T\}\)</span>, we denote the probabilities <span class="math inline">\(P(G=k \mid X=x) = p_k(x;\theta)\)</span>.</p>
+<p>There is no closed form solution for the coefficients <span class="math inline">\(\theta\)</span>, so logistic regression models are usually fit by maximum likelihood, using the conditional likelihood of <span class="math inline">\(G\)</span> given <span class="math inline">\(X\)</span>. Since</p>
 </div>
 
 
