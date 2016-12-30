@@ -206,7 +206,7 @@ f_k(x) = \frac{1}{(2 \pi)^\frac{p}{2} \lvert \Sigma_k \rvert^{\frac{1}{2}}}e^{- 
 </div>
 <div id="logistic-regression" class="section level2">
 <h2><strong>4.4 Logistic Regression</strong></h2>
-<p>Logistic regression- model the posterior probabiltiies of the <span class="math inline">\(K\)</span> classes via lienar functions in <span class="math inline">\(x\)</span>, while ensuring that they sum to one and remain in <span class="math inline">\([0,1]\)</span> (so that they can be interepreted as probabiltiies). The model: <span class="math display">\[
+<p>Logistic regression- model the posterior probabiltiies of the <span class="math inline">\(K\)</span> classes via linear functions in <span class="math inline">\(x\)</span>, while ensuring that they sum to one and remain in <span class="math inline">\([0,1]\)</span> (so that they can be interepreted as probabiltiies). The model: <span class="math display">\[
 \begin{align}
 \log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{10} + \beta_1^Tx \\
 \log\frac{P(G=2 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{20} + \beta_2^Tx \\
@@ -216,8 +216,8 @@ f_k(x) = \frac{1}{(2 \pi)^\frac{p}{2} \lvert \Sigma_k \rvert^{\frac{1}{2}}}e^{- 
 \]</span> The model is specified in terms of <span class="math inline">\(K-1\)</span> log-odds or logit transformations (reflecting the constraint that the probabilities sum to one, so the <span class="math inline">\(K\)</span>th probability is determined by the previous <span class="math inline">\(K-1\)</span>). From the log-odds above, we can calculate the probability of the last (<span class="math inline">\(K\)</span>th) class: <span class="math display">\[
 \begin{align}
 P(G=K \mid X=x) &amp; = 1-\sum_{\ell=1}^{K-1}P(G=\ell \mid X=x) \\
-P(G=K \mid X=x) &amp; = 1-\sum_{\ell=1}^{K-1}P(G=k \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
-P(G=K \mid X=x) &amp; = 1-P(G=k \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) &amp; = 1-\sum_{\ell=1}^{K-1}P(G=K \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) &amp; = 1-P(G=K \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
 P(G=K \mid X=x) \left[1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \right] &amp; = 1 \\
 P(G=K \mid X=x) &amp; = \frac{1}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
 \end{align}
@@ -227,7 +227,56 @@ P(G=k \mid X=x) &amp; = P(G=K \mid X=x) \exp\left(\beta_{k0}+ \beta_k^Tx \right)
 P(G=k \mid X=x) &amp; = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
 \end{align*}
 \]</span> These probabilities sum to one as expected. The model uses the last class <span class="math inline">\(K\)</span> as the denominator in the odds-ratios, however, the choice of the class to use as the denominator is arbitrary in that the estimates don’t change by this choice. To emphasize the dependence on the entire parameter set <span class="math inline">\(\theta = \{\beta_{10}, \beta_1^T, \dots, \beta_{(K-1)0}, \beta_{K-1}^T\}\)</span>, we denote the probabilities <span class="math inline">\(P(G=k \mid X=x) = p_k(x;\theta)\)</span>.</p>
-<p>There is no closed form solution for the coefficients <span class="math inline">\(\theta\)</span>, so logistic regression models are usually fit by maximum likelihood, using the conditional likelihood of <span class="math inline">\(G\)</span> given <span class="math inline">\(X\)</span>. Since</p>
+<p>There is no closed form solution for the coefficients <span class="math inline">\(\theta\)</span>, so logistic regression models are usually fit by maximum likelihood, using the conditional likelihood of <span class="math inline">\(G\)</span> given <span class="math inline">\(X\)</span>. Since <span class="math inline">\(P(G \mid X)\)</span> completely specifies the conditional distribution, the <em>multinomial</em> distribution is appropriate. The log-likelihood for <span class="math inline">\(N\)</span> observations is <span class="math display">\[
+\ell(\theta) = \sum_{i=1}^N \log p_{g_i}(x_i; \theta)
+\]</span> , where <span class="math inline">\(p_k(x_i; \theta) = P(G=k \mid X=x_i; \theta)\)</span>. Taking the two-class case, since the algorithms simplify considerably. Code the two-class <span class="math inline">\(g_i\)</span> via a <span class="math inline">\(0/1\)</span> response <span class="math inline">\(y_i\)</span>, where <span class="math inline">\(y_i = 1\)</span> when <span class="math inline">\(g_i = 1\)</span>, and <span class="math inline">\(y_i = 0\)</span> when <span class="math inline">\(g_i = 2\)</span>. Let <span class="math inline">\(p_1(x;\theta)=p(x;\theta)\)</span>, and <span class="math inline">\(p_2(x;\theta) = 1-p(x;\theta)\)</span>. The log-likelihood can be written: <span class="math display">\[
+\begin{align}
+\ell(\beta) &amp; = \sum_{i=1}^N \left\{y_i \log p(x_i; \beta) + (1-y_i) \log(1-p(x_i;\beta)) \right\} \\
+            &amp; = \sum_{i=1}^N \left\{y_i \log \frac{p(x_i;\beta)}{1-p(x_i; \beta)} + \log\left(1-p(x_i; \beta)\right) \right\} \\
+            &amp; = \sum_{i=1}^N \left\{y_i \beta^Tx_i + \log\left(1-\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} \right) \right\} \\
+            &amp; = \sum_{i=1}^N \left\{y_i \beta^Tx_i + \log\left(\frac{1}{1+e^{\beta^Tx_i}}\right) \right\} \\
+            &amp; = \sum_{i=1}^N \left\{y_i \beta^Tx_i - \log\left(1+e^{\beta^Tx_i} \right) \right\}
+\end{align}
+\]</span></p>
+<p>To maximize log-likelihood, take the derivative to get the <em>score</em> equations, and set to zero. <span class="math display">\[
+\begin{align}
+\ell(\beta) &amp; = \sum_{i=1}^N \left\{y_i \beta^Tx_i - \log\left(1+e^{\beta^Tx_i} \right) \right\} \\
+\frac{\partial \ell(\beta)}{\partial\beta} &amp; = \sum_{i=1}^N \left\{y_ix_i-\frac{1}{1+e^{\beta^Tx_i}}\left(e^{\beta^Tx_i} \right)\left(x_i\right) \right\} \\
+\frac{\partial \ell(\beta)}{\partial\beta} &amp; = \sum_{i=1}^N x_i \left(y_i-p(x_i;\beta) \right) = 0
+\end{align}
+\]</span></p>
+<p>These are <span class="math inline">\(p+1\)</span> equations <em>nonlinear</em> in <span class="math inline">\(\beta\)</span>. Since there’s no closed form solution, we solve it numerically, using something called the Newton-Raphson algorithm, which requires the second derivative or Hessian matrix: <span class="math display">\[
+\begin{align}
+\frac{\partial \ell(\beta)}{\partial\beta} &amp; = \sum_{i=1}^N x_i \left(y_i- \frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} \right) \\
+\frac{\partial^2 \ell(\beta)}{\partial \beta \partial \beta^T} &amp; = \sum_{i=1}^N x_i \left(\frac{x_ie^{\beta^Tx_i} \left(1+e^{\beta^T x_i} \right) - x_ie^{\beta^T x_i}\left(e^{\beta^Tx_i} \right)}{\left(1+e^{\beta^Tx_i} \right)^2} \right) \\
+        &amp; = \sum_{i=1}^N x_i x_i^T \left(\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} + \left(\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}}\right)^2\right) \\
+        &amp; = \sum_{i=1}^N x_i x_i^T \left(p(x_i;\beta)+ p^2(x_i;\beta) \right) \\
+        &amp; = - \sum_{i=1}^N x_i x_i^T p(x_i;\beta) \left(1-p(x_i;\beta)\right)
+\end{align}
+\]</span></p>
+<p>Starting with a guess <span class="math inline">\(\beta^{\text{old}}\)</span>, a single Newton update is <span class="math display">\[
+\beta^{\text{new}} = \beta^{\text{old}}-\left(\frac{\partial^2\ell(\beta)}{\partial\beta\partial\beta^T} \right)^{-1}\frac{\partial\ell (\beta)}{\partial\beta}
+\]</span></p>
+<p>, where the derivatives are evalued at <span class="math inline">\(\beta^{\text{old}}\)</span>.</p>
+<p>The score and the Hessian can be written conveniently in matrix notation. Let <span class="math inline">\(\mathbf{y}\)</span> denote the vector of <span class="math inline">\(y_i\)</span> values, <span class="math inline">\(\mathbf{X}\)</span> the <span class="math inline">\(N \times (p+1)\)</span> matrix of <span class="math inline">\(x_i\)</span> values, <span class="math inline">\(\mathbf{p}\)</span> the vector of fitted probabilities with <span class="math inline">\(i\)</span>th element <span class="math inline">\(p(x_i; \beta^{\text{old}})\)</span> and <span class="math inline">\(\mathbf{W}\)</span> an <span class="math inline">\(N \times N\)</span> diagonal matrix of weights with <span class="math inline">\(i\)</span>th diagonal element <span class="math inline">\(p(x_i; \beta^{\text{old}})(1-p(x_i; \beta^{\text{old}}))\)</span>. Then we have: <span class="math display">\[
+\begin{align}
+\frac{\partial \ell (\beta)}{\partial \beta} &amp; = \mathbf{X}^T (\mathbf{y}-\mathbf{p}) \\
+\frac{\partial^2 \ell(\beta)}{\partial \beta \partial \beta^T} &amp; = -\mathbf{X}^T \mathbf{WX}
+\end{align}
+\]</span></p>
+<p>The Newton step is thus: <span class="math display">\[
+\begin{align}
+\beta^{\text{new}}  &amp; = \beta^{\text{old}} + \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T (\mathbf{y}-\mathbf{p}) \\
+                    &amp; = \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T \mathbf{W} \left(\mathbf{X} \beta^{\text{old}} + \mathbf{W}^{-1}\left(\mathbf{y}-\mathbf{p} \right) \right) \\
+                    &amp; = \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T \mathbf{Wz}
+\end{align}
+\]</span></p>
+<p>Rewriting it this way re-expresses the Newton step as a weighted least squares step, with the response <span class="math display">\[
+\mathbf{z} = \mathbf{X}\beta^{\text{old}} + \mathbf{W}^{-1} \left(\mathbf{y} - \mathbf{p} \right)
+\]</span></p>
+<p>sometimes known as the <em>adjusted response</em>. This algorithm is known as <strong><em>iteratively reweighted least squares</em></strong> or IRLS, since each iteration solves the weighted least squares problem: <span class="math display">\[
+\beta^{\text{new}} \gets \underset{\beta}{\text{argmin}} \left(\mathbf{z}-\mathbf{X}\beta \right)\mathbf{W}\left(\mathbf{z}-\mathbf{X}\beta \right)
+\]</span></p>
 </div>
 
 

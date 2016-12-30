@@ -93,7 +93,7 @@ QDA arises in the case that the classes do not have common covariance matrices, 
 ?????????????
 
 ## **4.4 Logistic Regression**
-Logistic regression- model the posterior probabiltiies of the $K$ classes via lienar functions in $x$, while ensuring that they sum to one and remain in $[0,1]$ (so that they can be interepreted as probabiltiies). The model:
+Logistic regression- model the posterior probabiltiies of the $K$ classes via linear functions in $x$, while ensuring that they sum to one and remain in $[0,1]$ (so that they can be interepreted as probabiltiies). The model:
 $$
 \begin{align}
 \log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{10} + \beta_1^Tx \\
@@ -106,8 +106,8 @@ The model is specified in terms of $K-1$ log-odds or logit transformations (refl
 $$
 \begin{align}
 P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=\ell \mid X=x) \\
-P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=k \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
-P(G=K \mid X=x) & = 1-P(G=k \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=K \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
+P(G=K \mid X=x) & = 1-P(G=K \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
 P(G=K \mid X=x) \left[1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \right] & = 1 \\
 P(G=K \mid X=x) & = \frac{1}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
 \end{align}
@@ -125,4 +125,67 @@ There is no closed form solution for the coefficients $\theta$, so logistic regr
 $$
 \ell(\theta) = \sum_{i=1}^N \log p_{g_i}(x_i; \theta)
 $$
-, where $p_k(x_i; \theta) = P(G=k \mid X=x_i; \theta)$.
+, where $p_k(x_i; \theta) = P(G=k \mid X=x_i; \theta)$. Taking the two-class case, since the algorithms simplify considerably. Code the two-class $g_i$ via a $0/1$ response $y_i$, where $y_i = 1$ when $g_i = 1$, and $y_i = 0$ when $g_i = 2$. Let $p_1(x;\theta)=p(x;\theta)$, and $p_2(x;\theta) = 1-p(x;\theta)$. The log-likelihood can be written:
+$$
+\begin{align}
+\ell(\beta) & = \sum_{i=1}^N \left\{y_i \log p(x_i; \beta) + (1-y_i) \log(1-p(x_i;\beta)) \right\} \\
+            & = \sum_{i=1}^N \left\{y_i \log \frac{p(x_i;\beta)}{1-p(x_i; \beta)} + \log\left(1-p(x_i; \beta)\right) \right\} \\
+            & = \sum_{i=1}^N \left\{y_i \beta^Tx_i + \log\left(1-\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} \right) \right\} \\
+            & = \sum_{i=1}^N \left\{y_i \beta^Tx_i + \log\left(\frac{1}{1+e^{\beta^Tx_i}}\right) \right\} \\
+            & = \sum_{i=1}^N \left\{y_i \beta^Tx_i - \log\left(1+e^{\beta^Tx_i} \right) \right\}
+\end{align}
+$$
+
+To maximize log-likelihood, take the derivative to get the *score* equations, and set to zero.
+$$
+\begin{align}
+\ell(\beta) & = \sum_{i=1}^N \left\{y_i \beta^Tx_i - \log\left(1+e^{\beta^Tx_i} \right) \right\} \\
+\frac{\partial \ell(\beta)}{\partial\beta} & = \sum_{i=1}^N \left\{y_ix_i-\frac{1}{1+e^{\beta^Tx_i}}\left(e^{\beta^Tx_i} \right)\left(x_i\right) \right\} \\
+\frac{\partial \ell(\beta)}{\partial\beta} & = \sum_{i=1}^N x_i \left(y_i-p(x_i;\beta) \right) = 0
+\end{align}
+$$
+
+These are $p+1$ equations *nonlinear* in $\beta$. Since there's no closed form solution, we solve it numerically, using something called the Newton-Raphson algorithm, which requires the second derivative or Hessian matrix:
+$$
+\begin{align}
+\frac{\partial \ell(\beta)}{\partial\beta} & = \sum_{i=1}^N x_i \left(y_i- \frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} \right) \\
+\frac{\partial^2 \ell(\beta)}{\partial \beta \partial \beta^T} & = \sum_{i=1}^N x_i \left(\frac{x_ie^{\beta^Tx_i} \left(1+e^{\beta^T x_i} \right) - x_ie^{\beta^T x_i}\left(e^{\beta^Tx_i} \right)}{\left(1+e^{\beta^Tx_i} \right)^2} \right) \\
+        & = \sum_{i=1}^N x_i x_i^T \left(\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} + \left(\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}}\right)^2\right) \\
+        & = \sum_{i=1}^N x_i x_i^T \left(p(x_i;\beta)+ p^2(x_i;\beta) \right) \\
+        & = - \sum_{i=1}^N x_i x_i^T p(x_i;\beta) \left(1-p(x_i;\beta)\right)
+\end{align}
+$$
+
+Starting with a guess $\beta^{\text{old}}$, a single Newton update is
+$$
+\beta^{\text{new}} = \beta^{\text{old}}-\left(\frac{\partial^2\ell(\beta)}{\partial\beta\partial\beta^T} \right)^{-1}\frac{\partial\ell (\beta)}{\partial\beta}
+$$
+
+, where the derivatives are evalued at $\beta^{\text{old}}$.
+
+The score and the Hessian can be written conveniently in matrix notation. Let $\mathbf{y}$ denote the vector of $y_i$ values, $\mathbf{X}$ the $N \times (p+1)$ matrix of $x_i$ values, $\mathbf{p}$ the vector of fitted probabilities with $i$th element $p(x_i; \beta^{\text{old}})$ and $\mathbf{W}$ an $N \times N$ diagonal matrix of weights with $i$th diagonal element $p(x_i; \beta^{\text{old}})(1-p(x_i; \beta^{\text{old}}))$. Then we have:
+$$
+\begin{align}
+\frac{\partial \ell (\beta)}{\partial \beta} & = \mathbf{X}^T (\mathbf{y}-\mathbf{p}) \\
+\frac{\partial^2 \ell(\beta)}{\partial \beta \partial \beta^T} & = -\mathbf{X}^T \mathbf{WX}
+\end{align}
+$$
+
+The Newton step is thus:
+$$
+\begin{align}
+\beta^{\text{new}}  & = \beta^{\text{old}} + \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T (\mathbf{y}-\mathbf{p}) \\
+                    & = \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T \mathbf{W} \left(\mathbf{X} \beta^{\text{old}} + \mathbf{W}^{-1}\left(\mathbf{y}-\mathbf{p} \right) \right) \\
+                    & = \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T \mathbf{Wz}
+\end{align}
+$$
+
+Rewriting it this way re-expresses the Newton step as a weighted least squares step, with the response
+$$
+\mathbf{z} = \mathbf{X}\beta^{\text{old}} + \mathbf{W}^{-1} \left(\mathbf{y} - \mathbf{p} \right)
+$$
+
+sometimes known as the *adjusted response*. This algorithm is known as ***iteratively reweighted least squares*** or IRLS, since each iteration solves the weighted least squares problem:
+$$
+\beta^{\text{new}} \gets \underset{\beta}{\text{argmin}} \left(\mathbf{z}-\mathbf{X}\beta \right)\mathbf{W}\left(\mathbf{z}-\mathbf{X}\beta \right)
+$$
