@@ -125,7 +125,10 @@ $(document).ready(function () {
 <li><a href="#linear-regression-of-an-indicator-matrix"><strong>4.2 Linear Regression of an Indicator Matrix</strong></a></li>
 <li><a href="#linear-discriminant-analysis"><strong>4.3 Linear Discriminant Analysis</strong></a></li>
 <li><a href="#logistic-regression"><strong>4.4 Logistic Regression</strong></a></li>
-<li><a href="#separating-hyperplanes"><strong>4.5 Separating Hyperplanes</strong></a></li>
+<li><a href="#separating-hyperplanes"><strong>4.5 Separating Hyperplanes</strong></a><ul>
+<li><a href="#rosenblatts-perceptron-learning-algorithm"><strong>4.5.1 Rosenblatt’s Perceptron Learning Algorithm</strong></a></li>
+<li><a href="#optimal-separating-hyperplanes"><strong>Optimal Separating Hyperplanes</strong></a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -308,8 +311,52 @@ P(G=k \mid X=x) &amp; = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{
     &amp; = \frac{1}{\lVert \beta \rVert} \left(\beta^Tx+\beta_0 \right) \\
     &amp; = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
   \end{align}
-  \]</span></p>
-<pre><code>- Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.</code></pre>
+  \]</span> - Hence, <span class="math inline">\(f(x)\)</span> is proportional to the signed distance from <span class="math inline">\(x\)</span> to the hyperplane defined by <span class="math inline">\(f(x)=0\)</span>.</p>
+<div id="rosenblatts-perceptron-learning-algorithm" class="section level3">
+<h3><strong>4.5.1 Rosenblatt’s Perceptron Learning Algorithm</strong></h3>
+<p><strong><em>Perceptron learning algorithm</em></strong> - find a separating hyperplane by minimizing the distance of misclassified points to the decision boundary.</p>
+<ul>
+<li>if response <span class="math inline">\(y_i = 1\)</span> is misclassified, then <span class="math inline">\(x_i^T\beta+\beta_0 &lt; 0\)</span></li>
+<li>if response <span class="math inline">\(y_i = -1\)</span> is misclassified, then <span class="math inline">\(x_i^T\beta+\beta_0 &gt; 0\)</span>.</li>
+</ul>
+<p>Therefore, the goal can be stated as minimizing <span class="math display">\[
+D(\beta, \beta_0) = - \sum_{i \in \mathcal{M}} y_i \left(x_i^T \beta + \beta_0 \right),
+\]</span></p>
+<p>where <span class="math inline">\(\mathcal{M}\)</span> indexes the set of misclassified points.</p>
+<p><span class="math inline">\(D(\beta, \beta_0)\)</span> is: - non-negative - proportional to the distance of the misclassified points to the decision boundary <span class="math inline">\(\beta^Tx+\beta_0\)</span>.</p>
+<p>The gradient (assuming <span class="math inline">\(\mathcal{M}\)</span> is fixed): <span class="math display">\[
+\begin{align}
+\nabla_\beta D(\beta,\beta_0) &amp; = - \sum_{i \in \mathcal{M}} y_i x_i  &amp;&amp;&amp;\nabla_{\beta_0}D(\beta, \beta_0)  = -\sum_{i \in \mathcal{M}}y_i \\ 
+\end{align}
+\]</span></p>
+<p>The perceptron algorithm uses <strong><em>stochastic gradient descent</em></strong> to minimize <span class="math inline">\(D(\beta, \beta_0)\)</span>, i.e. the parameters are updated after visiting each observation rather than the entire training set. The update rule: <span class="math display">\[
+\begin{pmatrix} \beta \\ \beta_0 \end{pmatrix} \gets \begin{pmatrix}\beta \\ \beta_0 \end{pmatrix} + \rho \begin{pmatrix}y_ix_i \\ y_i \end{pmatrix}
+\]</span> , where <span class="math inline">\(\rho\)</span> is the learning rate.</p>
+<p>Problems with the perceptron algorithm:</p>
+<ul>
+<li>When the data are separable, there are many solutions, and the chosen solution depends on the initial values</li>
+<li>Although guaranteed to be finite, the number of steps can be very large. Smaller gaps require longer time to find.</li>
+<li>When the data are not separable, the algorithm will not converge, and cycles develop which can be hard to detect.</li>
+</ul>
+</div>
+<div id="optimal-separating-hyperplanes" class="section level3">
+<h3><strong>Optimal Separating Hyperplanes</strong></h3>
+<p><strong><em>Optimal separating hyperplane</em></strong>- separate two classes and maximize the distance to the closest point from either class</p>
+<ul>
+<li>provides a unique solution</li>
+<li>better performance on test data by maximizing the margin between classes</li>
+</ul>
+<p>The optimization problem: <span class="math display">\[
+\max_{\beta, \beta_0, \lVert \beta \rVert =1} M \\
+\text{subject to } y_i(x_i^T\beta + \beta_0) \geq M, i = 1, \dots, N.
+\]</span> This is equivalent to: <span class="math display">\[
+\begin{align}
+\frac{1}{\lVert \beta \rVert} y_i \left(x_i^T\beta + \beta_0 \right) &amp; \geq M &amp; \text{note that this redefines }\beta_0 \\
+y_i \left(x_i^T\beta + \beta_0 \right) &amp; \geq M \lVert \beta \rVert \\
+\end{align}
+\]</span> Since for any <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\beta_0\)</span> satisfying these inequalities, any positively scaled multiple satisfies them too, we can choose <span class="math inline">\(\lVert \beta \rVert= \frac{1}{M}\)</span>. Then, $$</p>
+<p>$$</p>
+</div>
 </div>
 
 

@@ -222,6 +222,68 @@ Some properties:
     & = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
   \end{align}
   $$
+      - Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.
+      
+### **4.5.1 Rosenblatt's Perceptron Learning Algorithm**
+***Perceptron learning algorithm*** - find a separating hyperplane by minimizing the distance of misclassified points to the decision boundary.
+
+  - if response $y_i = 1$ is misclassified, then $x_i^T\beta+\beta_0 < 0$
+  - if response $y_i = -1$ is misclassified, then $x_i^T\beta+\beta_0 > 0$.
   
+Therefore, the goal can be stated as minimizing
+$$
+D(\beta, \beta_0) = - \sum_{i \in \mathcal{M}} y_i \left(x_i^T \beta + \beta_0 \right),
+$$
+
+where $\mathcal{M}$ indexes the set of misclassified points.
+
+$D(\beta, \beta_0)$ is:
+  - non-negative
+  - proportional to the distance of the misclassified points to the decision boundary $\beta^Tx+\beta_0$.
+
+The gradient (assuming $\mathcal{M}$ is fixed):
+$$
+\begin{align}
+\nabla_\beta D(\beta,\beta_0) & = - \sum_{i \in \mathcal{M}} y_i x_i  &&&\nabla_{\beta_0}D(\beta, \beta_0)  = -\sum_{i \in \mathcal{M}}y_i \\ 
+\end{align}
+$$
+
+The perceptron algorithm uses ***stochastic gradient descent*** to minimize $D(\beta, \beta_0)$, i.e. the parameters are updated after visiting each observation rather than the entire training set. The update rule:
+$$
+\begin{pmatrix} \beta \\ \beta_0 \end{pmatrix} \gets \begin{pmatrix}\beta \\ \beta_0 \end{pmatrix} + \rho \begin{pmatrix}y_ix_i \\ y_i \end{pmatrix}
+$$
+, where $\rho$ is the learning rate.
+
+Problems with the perceptron algorithm:
+
+  - When the data are separable, there are many solutions, and the chosen solution depends on the initial values
+  - Although guaranteed to be finite, the number of steps can be very large. Smaller gaps require longer time to find.
+  - When the data are not separable, the algorithm will not converge, and cycles develop which can be hard to detect.
   
-    - Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.
+### **Optimal Separating Hyperplanes**
+***Optimal separating hyperplane***- separate two classes and maximize the distance to the closest point from either class
+
+  - provides a unique solution
+  - better performance on test data by maximizing the margin between classes
+  
+The optimization problem:
+$$
+\max_{\beta, \beta_0, \lVert \beta \rVert =1} M \\
+\text{subject to } y_i(x_i^T\beta + \beta_0) \geq M, i = 1, \dots, N.
+$$
+This is equivalent to:
+$$
+\begin{align}
+\frac{1}{\lVert \beta \rVert} y_i \left(x_i^T\beta + \beta_0 \right) & \geq M & \text{note that this redefines }\beta_0 \\
+y_i \left(x_i^T\beta + \beta_0 \right) & \geq M \lVert \beta \rVert \\
+\end{align}
+$$
+Since for any $\beta$ and $\beta_0$ satisfying these inequalities, any positively scaled multiple satisfies them too, we can choose $\lVert \beta \rVert= \frac{1}{M}$. Then,
+$$
+\min_{\beta, \beta_0} = \frac{1}{2} \lVert \beta \rVert^2 \\
+\text{subject to } y_i \left(x_i^T\beta + \beta_0 \right) \geq 1, \quad i = 1, \dots, N.
+$$
+These constrains define an empty slab or margin around the linear decision boundary of thickness of $\frac{1}{\lVert \beta \rVert}$. Hence we choose $\beta$ and $\beta_0$ to maximize its thickness. This is a convex optimization problem
+
+?????the math got very hard, finish this later
+
