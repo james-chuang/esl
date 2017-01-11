@@ -125,6 +125,7 @@ $(document).ready(function () {
 <li><a href="#linear-regression-of-an-indicator-matrix"><strong>4.2 Linear Regression of an Indicator Matrix</strong></a></li>
 <li><a href="#linear-discriminant-analysis"><strong>4.3 Linear Discriminant Analysis</strong></a></li>
 <li><a href="#logistic-regression"><strong>4.4 Logistic Regression</strong></a></li>
+<li><a href="#separating-hyperplanes"><strong>4.5 Separating Hyperplanes</strong></a></li>
 </ul>
 </div>
 
@@ -206,7 +207,7 @@ f_k(x) = \frac{1}{(2 \pi)^\frac{p}{2} \lvert \Sigma_k \rvert^{\frac{1}{2}}}e^{- 
 </div>
 <div id="logistic-regression" class="section level2">
 <h2><strong>4.4 Logistic Regression</strong></h2>
-<p>Logistic regression- model the posterior probabiltiies of the <span class="math inline">\(K\)</span> classes via linear functions in <span class="math inline">\(x\)</span>, while ensuring that they sum to one and remain in <span class="math inline">\([0,1]\)</span> (so that they can be interepreted as probabiltiies). The model: <span class="math display">\[
+<p>Logistic regression- model the posterior probabiltiies of the <span class="math inline">\(K\)</span> classes via linear functions in <span class="math inline">\(x\)</span>, while ensuring that they sum to one and remain in <span class="math inline">\([0,1]\)</span> (so that they can be interepreted as probabilties). The model: <span class="math display">\[
 \begin{align}
 \log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{10} + \beta_1^Tx \\
 \log\frac{P(G=2 \mid X=x)}{P(G=K \mid X=x)} &amp; = \beta_{20} + \beta_2^Tx \\
@@ -277,6 +278,38 @@ P(G=k \mid X=x) &amp; = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{
 <p>sometimes known as the <em>adjusted response</em>. This algorithm is known as <strong><em>iteratively reweighted least squares</em></strong> or IRLS, since each iteration solves the weighted least squares problem: <span class="math display">\[
 \beta^{\text{new}} \gets \underset{\beta}{\text{argmin}} \left(\mathbf{z}-\mathbf{X}\beta \right)\mathbf{W}\left(\mathbf{z}-\mathbf{X}\beta \right)
 \]</span></p>
+</div>
+<div id="separating-hyperplanes" class="section level2">
+<h2><strong>4.5 Separating Hyperplanes</strong></h2>
+<p><strong><em>Separating hyperplane</em></strong> classifiers construct linear decision boundaries that explicitly try to separate the data into different classes as well as possible. They provide the basis for <strong><em>support vector classifiers</em></strong> (Ch. 12).</p>
+<p>A brief review of vector algebra.</p>
+<p>Consider a hyperplane or <em>affine set</em> <span class="math inline">\(L\)</span> defined by <span class="math inline">\(f(x) = \beta_0+\beta^Tx=0\)</span>. (in <span class="math inline">\(\mathbb{R}^2\)</span>, this is a line.)</p>
+<p>Some properties:</p>
+<ol style="list-style-type: decimal">
+<li><p>For any two points <span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span> lying in <span class="math inline">\(L\)</span>:</p>
+<span class="math display">\[
+  \begin{align}
+  \beta_0 + \beta^Tx_1 &amp; = \beta_0 + \beta^Tx_2 = 0 &amp; \text{by definition of } L\\
+  \beta^Tx_1 &amp; = \beta^Tx_2 \\
+  \beta^Tx_1 - \beta^Tx_2 &amp; = 0 \\
+  \beta^T \left(x_1-x_2 \right) &amp; = 0
+  \end{align}
+  \]</span>
+<ul>
+<li><p><span class="math inline">\(\beta^T \left(x_1-x_2 \right) = 0\)</span> implies that the vector <span class="math inline">\(\beta\)</span> is orthogonal to the vector <span class="math inline">\(\left(x_1-x_2\right)\)</span> on the surface of <span class="math inline">\(L\)</span>.</p></li>
+<li>Hence, <span class="math inline">\(\beta^{*} = \frac{\beta}{\lVert \beta \rVert}\)</span> is the vector normal to the surface of <span class="math inline">\(L\)</span>.</li>
+</ul></li>
+<li>For any point <span class="math inline">\(x_0 \in L\)</span>, <span class="math inline">\(\beta^T x_0 = -\beta_0\)</span>. (This follows directly from the definition of <span class="math inline">\(L\)</span>.)</li>
+<li><p>The signed distance of any point <span class="math inline">\(x\)</span> to <span class="math inline">\(L\)</span> is given by</p></li>
+</ol>
+<p><span class="math display">\[
+  \begin{align}
+    &amp; \qquad {\beta^{*}}^T \left(x-x_0 \right)  &amp; \text{projection of the vector }x-x_0 \text{ in the direction of }\beta^{*}\\
+    &amp; = \frac{1}{\lVert \beta \rVert} \left(\beta^Tx+\beta_0 \right) \\
+    &amp; = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
+  \end{align}
+  \]</span></p>
+<pre><code>- Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.</code></pre>
 </div>
 
 

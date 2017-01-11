@@ -93,7 +93,7 @@ QDA arises in the case that the classes do not have common covariance matrices, 
 ?????????????
 
 ## **4.4 Logistic Regression**
-Logistic regression- model the posterior probabiltiies of the $K$ classes via linear functions in $x$, while ensuring that they sum to one and remain in $[0,1]$ (so that they can be interepreted as probabiltiies). The model:
+Logistic regression- model the posterior probabiltiies of the $K$ classes via linear functions in $x$, while ensuring that they sum to one and remain in $[0,1]$ (so that they can be interepreted as probabilties). The model:
 $$
 \begin{align}
 \log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{10} + \beta_1^Tx \\
@@ -189,3 +189,39 @@ sometimes known as the *adjusted response*. This algorithm is known as ***iterat
 $$
 \beta^{\text{new}} \gets \underset{\beta}{\text{argmin}} \left(\mathbf{z}-\mathbf{X}\beta \right)\mathbf{W}\left(\mathbf{z}-\mathbf{X}\beta \right)
 $$
+
+## **4.5 Separating Hyperplanes**
+***Separating hyperplane*** classifiers construct linear decision boundaries that explicitly try to separate the data into different classes as well as possible. They provide the basis for ***support vector classifiers*** (Ch. 12).
+
+A brief review of vector algebra.
+
+Consider a hyperplane or *affine set* $L$ defined by $f(x) = \beta_0+\beta^Tx=0$. (in $\mathbb{R}^2$, this is a line.)
+
+Some properties:
+
+  1. For any two points $x_1$, $x_2$ lying in $L$:
+  
+      $$
+      \begin{align}
+      \beta_0 + \beta^Tx_1 & = \beta_0 + \beta^Tx_2 = 0 & \text{by definition of } L\\
+      \beta^Tx_1 & = \beta^Tx_2 \\
+      \beta^Tx_1 - \beta^Tx_2 & = 0 \\
+      \beta^T \left(x_1-x_2 \right) & = 0
+      \end{align}
+      $$
+      - $\beta^T \left(x_1-x_2 \right) = 0$ implies that the vector $\beta$ is orthogonal to the vector $\left(x_1-x_2\right)$ on the surface of $L$.
+      
+      - Hence, $\beta^{*} = \frac{\beta}{\lVert \beta \rVert}$ is the vector normal to the surface of $L$.
+  2. For any point $x_0 \in L$, $\beta^T x_0 = -\beta_0$. (This follows directly from the definition of $L$.)
+  3. The signed distance of any point $x$ to $L$ is given by
+  
+  $$
+  \begin{align}
+    & \qquad {\beta^{*}}^T \left(x-x_0 \right)  & \text{projection of the vector }x-x_0 \text{ in the direction of }\beta^{*}\\
+    & = \frac{1}{\lVert \beta \rVert} \left(\beta^Tx+\beta_0 \right) \\
+    & = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
+  \end{align}
+  $$
+  
+  
+    - Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.
