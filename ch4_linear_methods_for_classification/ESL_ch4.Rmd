@@ -17,12 +17,14 @@ Several different ways to find linear decision boundaries:
       - This regression approach is a member of a class of methods that model ***discriminant functions*** $\delta_k(x)$ for each class, and then classify $x$ to the class with the largest value for its discriminant function.
           - Methods that model the posterior probabilities $P(G=k \mid X=x)$ are also in this class. If either the $\delta_k(x)$ or $P(G=k \mid X=x)$ are linear in $x$, then the decision boundaries will be linear.
               - This remains true for monotone transformations of $\delta_k(x)$ or $P(G=k \mid X=x)$. For example, in two-class classification, a popular model for the posterior probabilities is
+              
               $$
               \begin{align}
               P(G=1 \mid X=x) & = \frac{\exp \left(\beta_0 + \beta^T x \right)}{1+ \exp \left(\beta_0 + \beta^T x \right)}, \\
               P(G=2 \mid X=x) & = \frac{1}{1+\exp \left(\beta_0 + \beta^T x \right)}
               \end{align}
               $$
+              
               - The monotone transformation used here is the ***logit*** transformation: $\log \left[\frac{p}{1-p} \right]$ (the inverse of the logistic sigmoid function)
               $$
               \log \frac{P(G=1 \mid X=x)}{P(G=2 \mid X=x)} = \beta_0 + \beta^T x
@@ -222,7 +224,9 @@ Some properties:
     & = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
   \end{align}
   $$
-      - Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.
+  
+  Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.
+  
       
 ### **4.5.1 Rosenblatt's Perceptron Learning Algorithm**
 ***Perceptron learning algorithm*** - find a separating hyperplane by minimizing the distance of misclassified points to the decision boundary.
@@ -238,6 +242,7 @@ $$
 where $\mathcal{M}$ indexes the set of misclassified points.
 
 $D(\beta, \beta_0)$ is:
+
   - non-negative
   - proportional to the distance of the misclassified points to the decision boundary $\beta^Tx+\beta_0$.
 

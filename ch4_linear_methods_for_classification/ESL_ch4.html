@@ -144,12 +144,15 @@ $(document).ready(function () {
 <ul>
 <li>Methods that model the posterior probabilities <span class="math inline">\(P(G=k \mid X=x)\)</span> are also in this class. If either the <span class="math inline">\(\delta_k(x)\)</span> or <span class="math inline">\(P(G=k \mid X=x)\)</span> are linear in <span class="math inline">\(x\)</span>, then the decision boundaries will be linear.
 <ul>
-<li>This remains true for monotone transformations of <span class="math inline">\(\delta_k(x)\)</span> or <span class="math inline">\(P(G=k \mid X=x)\)</span>. For example, in two-class classification, a popular model for the posterior probabilities is <span class="math display">\[
+<li>This remains true for monotone transformations of <span class="math inline">\(\delta_k(x)\)</span> or <span class="math inline">\(P(G=k \mid X=x)\)</span>. For example, in two-class classification, a popular model for the posterior probabilities is</li>
+</ul>
+<p><span class="math display">\[
   \begin{align}
   P(G=1 \mid X=x) &amp; = \frac{\exp \left(\beta_0 + \beta^T x \right)}{1+ \exp \left(\beta_0 + \beta^T x \right)}, \\
   P(G=2 \mid X=x) &amp; = \frac{1}{1+\exp \left(\beta_0 + \beta^T x \right)}
   \end{align}
-  \]</span></li>
+  \]</span></p>
+<ul>
 <li>The monotone transformation used here is the <strong><em>logit</em></strong> transformation: <span class="math inline">\(\log \left[\frac{p}{1-p} \right]\)</span> (the inverse of the logistic sigmoid function) <span class="math display">\[
   \log \frac{P(G=1 \mid X=x)}{P(G=2 \mid X=x)} = \beta_0 + \beta^T x
   \]</span>. Here the decision boundary is the set of points for which the <em>log-odds</em> are zero.</li>
@@ -311,7 +314,8 @@ P(G=k \mid X=x) &amp; = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{
     &amp; = \frac{1}{\lVert \beta \rVert} \left(\beta^Tx+\beta_0 \right) \\
     &amp; = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
   \end{align}
-  \]</span> - Hence, <span class="math inline">\(f(x)\)</span> is proportional to the signed distance from <span class="math inline">\(x\)</span> to the hyperplane defined by <span class="math inline">\(f(x)=0\)</span>.</p>
+  \]</span></p>
+<p>Hence, <span class="math inline">\(f(x)\)</span> is proportional to the signed distance from <span class="math inline">\(x\)</span> to the hyperplane defined by <span class="math inline">\(f(x)=0\)</span>.</p>
 <div id="rosenblatts-perceptron-learning-algorithm" class="section level3">
 <h3><strong>4.5.1 Rosenblatt’s Perceptron Learning Algorithm</strong></h3>
 <p><strong><em>Perceptron learning algorithm</em></strong> - find a separating hyperplane by minimizing the distance of misclassified points to the decision boundary.</p>
@@ -323,7 +327,11 @@ P(G=k \mid X=x) &amp; = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{
 D(\beta, \beta_0) = - \sum_{i \in \mathcal{M}} y_i \left(x_i^T \beta + \beta_0 \right),
 \]</span></p>
 <p>where <span class="math inline">\(\mathcal{M}\)</span> indexes the set of misclassified points.</p>
-<p><span class="math inline">\(D(\beta, \beta_0)\)</span> is: - non-negative - proportional to the distance of the misclassified points to the decision boundary <span class="math inline">\(\beta^Tx+\beta_0\)</span>.</p>
+<p><span class="math inline">\(D(\beta, \beta_0)\)</span> is:</p>
+<ul>
+<li>non-negative</li>
+<li>proportional to the distance of the misclassified points to the decision boundary <span class="math inline">\(\beta^Tx+\beta_0\)</span>.</li>
+</ul>
 <p>The gradient (assuming <span class="math inline">\(\mathcal{M}\)</span> is fixed): <span class="math display">\[
 \begin{align}
 \nabla_\beta D(\beta,\beta_0) &amp; = - \sum_{i \in \mathcal{M}} y_i x_i  &amp;&amp;&amp;\nabla_{\beta_0}D(\beta, \beta_0)  = -\sum_{i \in \mathcal{M}}y_i \\ 
@@ -354,8 +362,11 @@ D(\beta, \beta_0) = - \sum_{i \in \mathcal{M}} y_i \left(x_i^T \beta + \beta_0 \
 \frac{1}{\lVert \beta \rVert} y_i \left(x_i^T\beta + \beta_0 \right) &amp; \geq M &amp; \text{note that this redefines }\beta_0 \\
 y_i \left(x_i^T\beta + \beta_0 \right) &amp; \geq M \lVert \beta \rVert \\
 \end{align}
-\]</span> Since for any <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\beta_0\)</span> satisfying these inequalities, any positively scaled multiple satisfies them too, we can choose <span class="math inline">\(\lVert \beta \rVert= \frac{1}{M}\)</span>. Then, $$</p>
-<p>$$</p>
+\]</span> Since for any <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\beta_0\)</span> satisfying these inequalities, any positively scaled multiple satisfies them too, we can choose <span class="math inline">\(\lVert \beta \rVert= \frac{1}{M}\)</span>. Then, <span class="math display">\[
+\min_{\beta, \beta_0} = \frac{1}{2} \lVert \beta \rVert^2 \\
+\text{subject to } y_i \left(x_i^T\beta + \beta_0 \right) \geq 1, \quad i = 1, \dots, N.
+\]</span> These constrains define an empty slab or margin around the linear decision boundary of thickness of <span class="math inline">\(\frac{1}{\lVert \beta \rVert}\)</span>. Hence we choose <span class="math inline">\(\beta\)</span> and <span class="math inline">\(\beta_0\)</span> to maximize its thickness. This is a convex optimization problem</p>
+<p>?????the math got very hard, finish this later</p>
 </div>
 </div>
 
