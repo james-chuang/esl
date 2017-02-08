@@ -31,7 +31,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
           $$
       - ***test error***, aka ***generalization error***: the prediction error over an independent test sample
       $$
-      \text{Err}_\tau = \text{E} \left[L \left(Y, \hat{f}(X) \right) \mid \tau \right]
+      \text{Err}_{\mathcal{T}} = \text{E} \left[L \left(Y, \hat{f}(X) \right) \mid \mathcal{T} \right]
       $$
           - $X$ and $Y$ drawn randomly from their joint distribution (population)
           - here the training set $\tau$ is fixed, and the test error is for this specific training set
@@ -39,7 +39,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
       $$
       \begin{align}
       \text{Err}  & = \text{E} \left[L \left(Y, \hat{f}(X) \right) \right] \\
-                  & = \text{E} \left[\text{Err}_\tau \right]
+                  & = \text{E} \left[\text{Err}_{\mathcal{T}} \right]
       \end{align}
       $$
           - expectation averages over everything that is random, including randomness in the training set that produced $\hat{f}$
@@ -48,3 +48,115 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
       $$
       \overline{\text{err}} = \frac{1}{N} \sum_{i=1}^n L\left(y_i, \hat{f}(x_i) \right)
       $$
+      - want to know the expected test error of the estimated model $\hat{f}$
+          - a more complex model uses the training data more and is able to adapt to more complicated underlying structures
+              - hence, there is a decrease in bias but an increase in variance
+              - some intermediate model complexity will give minimum expected test error
+      - training error is **not** a good estimate of the test error
+          - training error consistently decreases with model complexity, and eventually drops to zero with enough complexity
+              - a model with zero training error is overfit to the training data and will typically generalize poorly
+  - Similarly, consider a qualitative or categorical response $G$ taking one of $K$ values in a set $\mathcal{G}$, labeled for convenience as $1, 2, \dots, K$
+      - typically, we model the probabilities $p_k(X) = \text{Pr}\left(G=k \mid X \right)$ (or some monotone transformations $f_k(X)$)
+      - then, classify by $\hat{G}(X) = \arg \max_k \hat{p}_k (X)$
+          - in some cases (e.g. 1-nearest neighbor classification), $\hat{G}(X)$ is produced directly
+      - typical loss functions:
+      
+      $$
+      \begin{align}
+      L\left(G, \hat{G}(X) \right)  & = I \left(G \neq \hat{G}(X) \right) && \text{(0-1 loss)} \\
+      \\
+      L\left(G, \hat{p}(X) \right)  & = -2 \sum_{k=1}^K I \left(G=k \right) \log \hat{p}_k (X) \\
+                                    & = -2 \log \hat{p}_G(X) && (-2 \times \text{log-likelihood, aka the } \textbf{deviance})
+      \end{align}
+      $$
+      - again, ***test error*** and the expected misclassification error:
+      $$
+      \text{Err}_{\mathcal{T}} = \text{E} \left[L \left(G, \hat{G}(X) \right) \mid \mathcal{T} \right], \qquad \text{Err}=\text{E} \left[\text{Err}_{\mathcal{T}} \right] \
+      $$
+      - training error is the sample analogue, e.g.:
+      
+      $$
+      \begin{align}
+      \overline{\text{err}} = - \frac{2}{N} \sum_{i=1}^N \log \hat{p}_{g_i}(x_i) && \text{sample log-likelihood for the model}
+      \end{align}
+      $$
+      - the log-likelihood can be used as a loss function for general response densities, e.g. Poisson, gamma, exponential, log-normal and others
+      - if $\text{Pr}_{\theta(X)}(Y)$ is the density of $Y$, indexed by a parameter $\theta(X)$ that depends on the predictor $X$, then
+      $$
+      L\left(Y, \theta(X) \right) = -2 \cdot \log \text{Pr}_{\theta(X)} \left(Y \right)
+      $$
+          - "$-2$" in the definnition makes the log-likelihood loss for the Gaussian distribution match squared-error loss
+  - notation for the rest of the chapter:
+      - $Y$ and $f(X)$ represent all of the above situations, since the focus is mainly on he quantitative response (squared-error loss) setting
+      - typically, a model will have tuning parameter(s) (hyperparameters) $\alpha$, so predictions can be written $\hat{f}_{\alpha}(x)$
+          - tuning parameter varies the complexity of the model
+          - want to find the value of $\alpha$ that minimizes error, i.e. produces the minimum of the average test error curve
+          - for brevity, the dependence of $\hat{f}(x)$ on $\alpha$ is often suppressed
+  - two separate goals:
+      - ***model selection***: estimating the performance of different models in order to choose the best one
+      - ***model assessment***: having chosen a final model, estimating its prediction error (generalization error) on new data
+      - in a data-rich situation, the best approach for both problems is to randomly divide dataset into training, validation, and test sets
+          - test set is used to fit the models
+          - validation set used to estimate prediction error for model selection
+          - test set used for assessment of the generalization error of the final chosen model
+              - the test set should **only** be brought out at the end of the data analysis
+      - methods of this chapter either approximate the validation step analytically (AIC, BIC, MDL, SRM) or by efficient sample re-use (cross-validation and the bootstrap)
+          - these methods are used in model selection and also provide an estimate of the test error of the final chosen model
+          
+## **7.3 The Bias-Variance Decomposition**
+
+  - Assumptions:
+      - $Y = f(X) + \epsilon$
+          - $\text{E}[\epsilon] = 0$
+          - $\text{Var}(\epsilon) = \sigma_{\epsilon}^2$
+  - we can derive an expression for the expected prediction error of a regression fit $\hat{f}(X)$ at an input point $X = x_0$, using squared error loss:
+  
+  $$
+  \begin{align}
+                  & \qquad \text{Err}(x_0)\\
+                  & = \text{E} \left[\left(Y - \hat{f}(x_0) \right)^2 \mid X = x_0 \right] \\
+                  & = \text{E} \left[\left(f(X) + \epsilon - \hat{f}(x_0) \right)^2 \mid X = x_0\right] && Y = f(X) + \epsilon \\
+                  & = \text{E} \left[\left(\left(f(X) - \hat{f}(x_0) \right)+ \epsilon \right)^2 \mid X = x_0\right] \\
+                  & = \text{E} \left[\left(f(x_0)-\hat{f}(x_0) \right)^2 + 2 \epsilon \left(f(x_0)-\hat{f}(x_0) \right) + \epsilon^2 \right] \\
+                  & = \text{E} \left[\left(f(x_0)-\hat{f}(x_0) \right)^2\right] + 2\text{E} \left[\epsilon \left(f(x_0)-\hat{f}(x_0) \right) \right]+ \text{E} \left[\epsilon^2\right] && \text{expectations are linear} \\
+                  & = \text{E} \left[f(x_0)- \text{E}\hat{f}(x_0) + \text{E}\hat{f}(x_0) + \hat{f}^2(x_0)\right] + 2\text{E}\left[\epsilon\right] \text{E}\left[\left(f(x_0) - \hat{f}(x_0) \right) \right] + \text{E}\left[\epsilon- \text{E}\left[\epsilon \right] \right]^2 && \text{E}[\epsilon] = 0 \\
+                  & = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 + 2 \left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right) + \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + 0 + \sigma_{\epsilon}^2 && \text{E}[\epsilon] = 0 \text{ again} \\
+                  & = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 \right] + 2 \text{E}\left[\left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)\right] + \text{E}\left[\left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + \sigma_{\epsilon}^2 && \text{expectations are linear} \\
+                  & = \text{Bias}^2\left(\hat{f}(x_0) \right)  + \text{Var}\left(\hat{f}(x_0) \right) + \sigma_{\epsilon}^2 && \text{E}\left[\text{E} \hat{f}(x_0) - \hat{f}(x_0) \mid X = x_0 \right] = 0 \\
+                  & = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}
+  \end{align}
+  $$
+  
+  - ***squared bias***: the amount by which the average of the estimate differs from the true mean
+  - ***variance***: the expected squared deviation of $\hat{f}(x_0)$ around its mean
+  - ***irreducible error***: variance of the target around its true mean $f(x_0)$
+      - cannot be avoided no matter how well we estimate $f(x_0)$, unless $\sigma_{\epsilon}^2 = 0$
+  - typically, the more complex a model $\hat{f}$, the lower the (squared) bias but the higher the variance
+  - for $k$-nearest-neighbor regression fit, the error has the simple form:
+  
+  $$
+  \begin{align}
+  \text{Err}(x_0) & = \text{E} \left[ \left(Y - \hat{f}_k(x_0) \right)^2 \mid X = x_0 \right] \\
+                  & = \sigma_{\epsilon}^2 + \left[ f(x_0) - \frac{1}{k} \sum_{\ell=1}^k f \left(x_{(\ell)} \right)\right] + \frac{\sigma_{\epsilon}^2}{k}
+  \end{align}
+  $$
+  
+  - here we assume that the training inputs $x_i$ are fixed, and the randomness arises from the $y_i$
+      - the number of neighbors $k$ is inversely related to the model complexity:
+          - for small $k$, the estiamte $\hat{f}_k(x)$ can potentially adapt itself better to the underlying $f(x)$
+          - as $k$ is increased, the bias -- the squared difference between $f(x_0)$ and the average of $f(x)$ at the $k$-nearest neighbors -- will typically increase, while the variance decreases
+  - for a linear model fit $\hat{f}_p(x) = x^T \hat{\beta}$, where the parameter $p$-vector $\beta$ is fit by least squares:
+  
+  $$
+  \begin{align}
+  \text{Err}(x_0) & = \text{E} \left[\left(Y - \hat{f}_p(x_0) \right)^2 \mid X = x_0 \right] \\
+                  & = \sigma_{\epsilon}^2 + \left[f(x_0) - \text{E} \hat{f}_p (x_0)\right]^2 + \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2 \\
+                  & \\
+                  & \hspace{3em}\mathbf{h}(x_0)  =\mathbf{X} \left(\mathbf{X}^T\mathbf{X} \right) x_0, \quad \text{the }N\text{-vector of linear weights producing the fit:}\\
+                  & \hspace{3em}\hat{f}_p(x_0) = x_0^T \left(\mathbf{X}^T \mathbf{X} \right) \mathbf{X}^T \mathbf{y}, \quad \text{hence,} \\
+                  & \hspace{3em}\text{Var}\left[\hat{f}_p(x_0) \right] = \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2
+  \end{align}
+  $$
+
+  
+  

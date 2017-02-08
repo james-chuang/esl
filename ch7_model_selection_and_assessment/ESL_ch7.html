@@ -123,6 +123,7 @@ $(document).ready(function () {
 <ul>
 <li><a href="#introduction"><strong>7.1 Introduction</strong></a></li>
 <li><a href="#bias-variance-and-model-complexity"><strong>7.2 Bias, Variance, and Model Complexity</strong></a></li>
+<li><a href="#the-bias-variance-decomposition"><strong>7.3 The Bias-Variance Decomposition</strong></a></li>
 </ul>
 </div>
 
@@ -130,7 +131,7 @@ $(document).ready(function () {
 <div id="introduction" class="section level2">
 <h2><strong>7.1 Introduction</strong></h2>
 <ul>
-<li>*<strong>generalization</strong> performance of a learning method: its prediction capability on independent test data
+<li><strong><em>generalization</em></strong> performance of a learning method: its prediction capability on independent test data
 <ul>
 <li>guides the choice of learning method or model</li>
 <li>a measure of the quality of the ultimately chosen model</li>
@@ -156,7 +157,7 @@ $(document).ready(function () {
                                 \end{cases}
   \]</span></li>
 <li><strong><em>test error</em></strong>, aka <strong><em>generalization error</em></strong>: the prediction error over an independent test sample <span class="math display">\[
-  \text{Err}_\tau = \text{E} \left[L \left(Y, \hat{f}(X) \right) \mid \tau \right]
+  \text{Err}_{\mathcal{T}} = \text{E} \left[L \left(Y, \hat{f}(X) \right) \mid \mathcal{T} \right]
   \]</span>
 <ul>
 <li><span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> drawn randomly from their joint distribution (population)</li>
@@ -165,11 +166,164 @@ $(document).ready(function () {
 <li><strong><em>expected prediction error</em></strong>, aka <strong><em>expected test error</em></strong>: <span class="math display">\[
   \begin{align}
   \text{Err}  &amp; = \text{E} \left[L \left(Y, \hat{f}(X) \right) \right] \\
-          &amp; = \text{E} \left[\text{Err}_\tau \right]
+          &amp; = \text{E} \left[\text{Err}_{\mathcal{T}} \right]
   \end{align}
+  \]</span>
+<ul>
+<li>expectation averages over everything that is random, including randomness in the training set that produced <span class="math inline">\(\hat{f}\)</span></li>
+<li>goal: estimate <span class="math inline">\(\text{Err}_\tau\)</span>. However, <span class="math inline">\(\text{Err}\)</span> is more amenable to statistical analysis</li>
+</ul></li>
+<li><strong><em>training error</em></strong>: the average loss over the training sample: <span class="math display">\[
+  \overline{\text{err}} = \frac{1}{N} \sum_{i=1}^n L\left(y_i, \hat{f}(x_i) \right)
   \]</span></li>
+<li>want to know the expected test error of the estimated model <span class="math inline">\(\hat{f}\)</span>
+<ul>
+<li>a more complex model uses the training data more and is able to adapt to more complicated underlying structures
+<ul>
+<li>hence, there is a decrease in bias but an increase in variance</li>
+<li>some intermediate model complexity will give minimum expected test error</li>
+</ul></li>
+</ul></li>
+<li>training error is <strong>not</strong> a good estimate of the test error
+<ul>
+<li>training error consistently decreases with model complexity, and eventually drops to zero with enough complexity
+<ul>
+<li>a model with zero training error is overfit to the training data and will typically generalize poorly</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li>Similarly, consider a qualitative or categorical response <span class="math inline">\(G\)</span> taking one of <span class="math inline">\(K\)</span> values in a set <span class="math inline">\(\mathcal{G}\)</span>, labeled for convenience as <span class="math inline">\(1, 2, \dots, K\)</span>
+<ul>
+<li>typically, we model the probabilities <span class="math inline">\(p_k(X) = \text{Pr}\left(G=k \mid X \right)\)</span> (or some monotone transformations <span class="math inline">\(f_k(X)\)</span>)</li>
+<li>then, classify by <span class="math inline">\(\hat{G}(X) = \arg \max_k \hat{p}_k (X)\)</span>
+<ul>
+<li>in some cases (e.g. 1-nearest neighbor classification), <span class="math inline">\(\hat{G}(X)\)</span> is produced directly</li>
+</ul></li>
+<li>typical loss functions:</li>
+</ul>
+<span class="math display">\[
+  \begin{align}
+  L\left(G, \hat{G}(X) \right)  &amp; = I \left(G \neq \hat{G}(X) \right) &amp;&amp; \text{(0-1 loss)} \\
+  \\
+  L\left(G, \hat{p}(X) \right)  &amp; = -2 \sum_{k=1}^K I \left(G=k \right) \log \hat{p}_k (X) \\
+                                &amp; = -2 \log \hat{p}_G(X) &amp;&amp; (-2 \times \text{log-likelihood, aka the } \textbf{deviance})
+  \end{align}
+  \]</span>
+<ul>
+<li>again, <strong><em>test error</em></strong> and the expected misclassification error: <span class="math display">\[
+  \text{Err}_{\mathcal{T}} = \text{E} \left[L \left(G, \hat{G}(X) \right) \mid \mathcal{T} \right], \qquad \text{Err}=\text{E} \left[\text{Err}_{\mathcal{T}} \right] \
+  \]</span></li>
+<li>training error is the sample analogue, e.g.:</li>
+</ul>
+<span class="math display">\[
+  \begin{align}
+  \overline{\text{err}} = - \frac{2}{N} \sum_{i=1}^N \log \hat{p}_{g_i}(x_i) &amp;&amp; \text{sample log-likelihood for the model}
+  \end{align}
+  \]</span>
+<ul>
+<li>the log-likelihood can be used as a loss function for general response densities, e.g. Poisson, gamma, exponential, log-normal and others</li>
+<li>if <span class="math inline">\(\text{Pr}_{\theta(X)}(Y)\)</span> is the density of <span class="math inline">\(Y\)</span>, indexed by a parameter <span class="math inline">\(\theta(X)\)</span> that depends on the predictor <span class="math inline">\(X\)</span>, then <span class="math display">\[
+  L\left(Y, \theta(X) \right) = -2 \cdot \log \text{Pr}_{\theta(X)} \left(Y \right)
+  \]</span>
+<ul>
+<li>“<span class="math inline">\(-2\)</span>” in the definnition makes the log-likelihood loss for the Gaussian distribution match squared-error loss</li>
+</ul></li>
+</ul></li>
+<li>notation for the rest of the chapter:
+<ul>
+<li><span class="math inline">\(Y\)</span> and <span class="math inline">\(f(X)\)</span> represent all of the above situations, since the focus is mainly on he quantitative response (squared-error loss) setting</li>
+<li>typically, a model will have tuning parameter(s) (hyperparameters) <span class="math inline">\(\alpha\)</span>, so predictions can be written <span class="math inline">\(\hat{f}_{\alpha}(x)\)</span>
+<ul>
+<li>tuning parameter varies the complexity of the model</li>
+<li>want to find the value of <span class="math inline">\(\alpha\)</span> that minimizes error, i.e. produces the minimum of the average test error curve</li>
+<li>for brevity, the dependence of <span class="math inline">\(\hat{f}(x)\)</span> on <span class="math inline">\(\alpha\)</span> is often suppressed</li>
+</ul></li>
+</ul></li>
+<li>two separate goals:
+<ul>
+<li><strong><em>model selection</em></strong>: estimating the performance of different models in order to choose the best one</li>
+<li><strong><em>model assessment</em></strong>: having chosen a final model, estimating its prediction error (generalization error) on new data</li>
+<li>in a data-rich situation, the best approach for both problems is to randomly divide dataset into training, validation, and test sets
+<ul>
+<li>test set is used to fit the models</li>
+<li>validation set used to estimate prediction error for model selection</li>
+<li>test set used for assessment of the generalization error of the final chosen model
+<ul>
+<li>the test set should <strong>only</strong> be brought out at the end of the data analysis</li>
+</ul></li>
+</ul></li>
+<li>methods of this chapter either approximate the validation step analytically (AIC, BIC, MDL, SRM) or by efficient sample re-use (cross-validation and the bootstrap)
+<ul>
+<li>these methods are used in model selection and also provide an estimate of the test error of the final chosen model</li>
+</ul></li>
 </ul></li>
 </ul>
+</div>
+<div id="the-bias-variance-decomposition" class="section level2">
+<h2><strong>7.3 The Bias-Variance Decomposition</strong></h2>
+<ul>
+<li>Assumptions:
+<ul>
+<li><span class="math inline">\(Y = f(X) + \epsilon\)</span>
+<ul>
+<li><span class="math inline">\(\text{E}[\epsilon] = 0\)</span></li>
+<li><span class="math inline">\(\text{Var}(\epsilon) = \sigma_{\epsilon}^2\)</span></li>
+</ul></li>
+</ul></li>
+<li>we can derive an expression for the expected prediction error of a regression fit <span class="math inline">\(\hat{f}(X)\)</span> at an input point <span class="math inline">\(X = x_0\)</span>, using squared error loss:</li>
+</ul>
+<p><span class="math display">\[
+  \begin{align}
+                  &amp; \qquad \text{Err}(x_0)\\
+                  &amp; = \text{E} \left[\left(Y - \hat{f}(x_0) \right)^2 \mid X = x_0 \right] \\
+                  &amp; = \text{E} \left[\left(f(X) + \epsilon - \hat{f}(x_0) \right)^2 \mid X = x_0\right] &amp;&amp; Y = f(X) + \epsilon \\
+                  &amp; = \text{E} \left[\left(\left(f(X) - \hat{f}(x_0) \right)+ \epsilon \right)^2 \mid X = x_0\right] \\
+                  &amp; = \text{E} \left[\left(f(x_0)-\hat{f}(x_0) \right)^2 + 2 \epsilon \left(f(x_0)-\hat{f}(x_0) \right) + \epsilon^2 \right] \\
+                  &amp; = \text{E} \left[\left(f(x_0)-\hat{f}(x_0) \right)^2\right] + 2\text{E} \left[\epsilon \left(f(x_0)-\hat{f}(x_0) \right) \right]+ \text{E} \left[\epsilon^2\right] &amp;&amp; \text{expectations are linear} \\
+                  &amp; = \text{E} \left[f(x_0)- \text{E}\hat{f}(x_0) + \text{E}\hat{f}(x_0) + \hat{f}^2(x_0)\right] + 2\text{E}\left[\epsilon\right] \text{E}\left[\left(f(x_0) - \hat{f}(x_0) \right) \right] + \text{E}\left[\epsilon- \text{E}\left[\epsilon \right] \right]^2 &amp;&amp; \text{E}[\epsilon] = 0 \\
+                  &amp; = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 + 2 \left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right) + \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + 0 + \sigma_{\epsilon}^2 &amp;&amp; \text{E}[\epsilon] = 0 \text{ again} \\
+                  &amp; = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 \right] + 2 \text{E}\left[\left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)\right] + \text{E}\left[\left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + \sigma_{\epsilon}^2 &amp;&amp; \text{expectations are linear} \\
+                  &amp; = \text{Bias}^2\left(\hat{f}(x_0) \right)  + \text{Var}\left(\hat{f}(x_0) \right) + \sigma_{\epsilon}^2 &amp;&amp; \text{E}\left[\text{E} \hat{f}(x_0) - \hat{f}(x_0) \mid X = x_0 \right] = 0 \\
+                  &amp; = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}
+  \end{align}
+  \]</span></p>
+<ul>
+<li><strong><em>squared bias</em></strong>: the amount by which the average of the estimate differs from the true mean</li>
+<li><strong><em>variance</em></strong>: the expected squared deviation of <span class="math inline">\(\hat{f}(x_0)\)</span> around its mean</li>
+<li><strong><em>irreducible error</em></strong>: variance of the target around its true mean <span class="math inline">\(f(x_0)\)</span>
+<ul>
+<li>cannot be avoided no matter how well we estimate <span class="math inline">\(f(x_0)\)</span>, unless <span class="math inline">\(\sigma_{\epsilon}^2 = 0\)</span></li>
+</ul></li>
+<li>typically, the more complex a model <span class="math inline">\(\hat{f}\)</span>, the lower the (squared) bias but the higher the variance</li>
+<li>for <span class="math inline">\(k\)</span>-nearest-neighbor regression fit, the error has the simple form:</li>
+</ul>
+<p><span class="math display">\[
+  \begin{align}
+  \text{Err}(x_0) &amp; = \text{E} \left[ \left(Y - \hat{f}_k(x_0) \right)^2 \mid X = x_0 \right] \\
+                  &amp; = \sigma_{\epsilon}^2 + \left[ f(x_0) - \frac{1}{k} \sum_{\ell=1}^k f \left(x_{(\ell)} \right)\right] + \frac{\sigma_{\epsilon}^2}{k}
+  \end{align}
+  \]</span></p>
+<ul>
+<li>here we assume that the training inputs <span class="math inline">\(x_i\)</span> are fixed, and the randomness arises from the <span class="math inline">\(y_i\)</span>
+<ul>
+<li>the number of neighbors <span class="math inline">\(k\)</span> is inversely related to the model complexity:
+<ul>
+<li>for small <span class="math inline">\(k\)</span>, the estiamte <span class="math inline">\(\hat{f}_k(x)\)</span> can potentially adapt itself better to the underlying <span class="math inline">\(f(x)\)</span></li>
+<li>as <span class="math inline">\(k\)</span> is increased, the bias – the squared difference between <span class="math inline">\(f(x_0)\)</span> and the average of <span class="math inline">\(f(x)\)</span> at the <span class="math inline">\(k\)</span>-nearest neighbors – will typically increase, while the variance decreases</li>
+</ul></li>
+</ul></li>
+<li>for a linear model fit <span class="math inline">\(\hat{f}_p(x) = x^T \hat{\beta}\)</span>, where the parameter <span class="math inline">\(p\)</span>-vector <span class="math inline">\(\beta\)</span> is fit by least squares:</li>
+</ul>
+<p><span class="math display">\[
+  \begin{align}
+  \text{Err}(x_0) &amp; = \text{E} \left[\left(Y - \hat{f}_p(x_0) \right)^2 \mid X = x_0 \right] \\
+                  &amp; = \sigma_{\epsilon}^2 + \left[f(x_0) - \text{E} \hat{f}_p (x_0)\right]^2 + \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2 \\
+                  &amp; \\
+                  &amp; \hspace{3em}\mathbf{h}(x_0)  =\mathbf{X} \left(\mathbf{X}^T\mathbf{X} \right) x_0, \quad \text{the }N\text{-vector of linear weights producing the fit:}\\
+                  &amp; \hspace{3em}\hat{f}_p(x_0) = x_0^T \left(\mathbf{X}^T \mathbf{X} \right) \mathbf{X}^T \mathbf{y}, \quad \text{hence,} \\
+                  &amp; \hspace{3em}\text{Var}\left[\hat{f}_p(x_0) \right] = \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2
+  \end{align}
+  \]</span></p>
 </div>
 
 
