@@ -1,0 +1,50 @@
+---
+output:
+  html_document:
+    toc: TRUE
+    fig_width: 4.5
+    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+---
+
+My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/~tibs/ElemStatLearn/) Ch. 7 on Model Assessment and Selection
+
+## **7.1 Introduction**
+
+  - ***generalization*** performance of a learning method: its prediction capability on independent test data
+      - guides the choice of learning method or model
+      - a measure of the quality of the ultimately chosen model
+      
+## **7.2 Bias, Variance, and Model Complexity**
+
+  - Consider the case of a quantitative or interval scale response with:
+      - target variable $Y$
+      - vectors of inputs $X$
+      - prediction model $\hat{f}(X)$ estimated from a training set $\tau$
+      - a loss function for measuring errors between $Y$ and $\hat{f}(X)$: $L\left(Y, \hat{f}(X) \right)$
+          - typical choices:
+          
+          $$
+          L\left(Y, \hat{f}(X)\right) = \begin{cases}
+                                        \left(Y-\hat{f}(X) \right)^2 & \text{squared error} \\
+                                        \left\lvert Y-\hat{f}(X)\right\rvert & \text{absolute error}
+                                        \end{cases}
+          $$
+      - ***test error***, aka ***generalization error***: the prediction error over an independent test sample
+      $$
+      \text{Err}_\tau = \text{E} \left[L \left(Y, \hat{f}(X) \right) \mid \tau \right]
+      $$
+          - $X$ and $Y$ drawn randomly from their joint distribution (population)
+          - here the training set $\tau$ is fixed, and the test error is for this specific training set
+      - ***expected prediction error***, aka ***expected test error***:
+      $$
+      \begin{align}
+      \text{Err}  & = \text{E} \left[L \left(Y, \hat{f}(X) \right) \right] \\
+                  & = \text{E} \left[\text{Err}_\tau \right]
+      \end{align}
+      $$
+          - expectation averages over everything that is random, including randomness in the training set that produced $\hat{f}$
+          - goal: estimate $\text{Err}_\tau$. However, $\text{Err}$ is more amenable to statistical analysis
+      - ***training error***: the average loss over the training sample:
+      $$
+      \overline{\text{err}} = \frac{1}{N} \sum_{i=1}^n L\left(y_i, \hat{f}(x_i) \right)
+      $$
