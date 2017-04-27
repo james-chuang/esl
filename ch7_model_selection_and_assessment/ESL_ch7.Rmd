@@ -85,9 +85,9 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
       $$
       L\left(Y, \theta(X) \right) = -2 \cdot \log \text{Pr}_{\theta(X)} \left(Y \right)
       $$
-          - "$-2$" in the definnition makes the log-likelihood loss for the Gaussian distribution match squared-error loss
+          - "$-2$" in the definition makes the log-likelihood loss for the Gaussian distribution match squared-error loss
   - notation for the rest of the chapter:
-      - $Y$ and $f(X)$ represent all of the above situations, since the focus is mainly on he quantitative response (squared-error loss) setting
+      - $Y$ and $f(X)$ represent all of the above situations, since the focus is mainly on the quantitative response (squared-error loss) setting
       - typically, a model will have tuning parameter(s) (hyperparameters) $\alpha$, so predictions can be written $\hat{f}_{\alpha}(x)$
           - tuning parameter varies the complexity of the model
           - want to find the value of $\alpha$ that minimizes error, i.e. produces the minimum of the average test error curve
@@ -96,7 +96,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
       - ***model selection***: estimating the performance of different models in order to choose the best one
       - ***model assessment***: having chosen a final model, estimating its prediction error (generalization error) on new data
       - in a data-rich situation, the best approach for both problems is to randomly divide dataset into training, validation, and test sets
-          - test set is used to fit the models
+          - training set is used to fit the models
           - validation set used to estimate prediction error for model selection
           - test set used for assessment of the generalization error of the final chosen model
               - the test set should **only** be brought out at the end of the data analysis
@@ -119,7 +119,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
                   & = \text{E} \left[\left(\left(f(X) - \hat{f}(x_0) \right)+ \epsilon \right)^2 \mid X = x_0\right] \\
                   & = \text{E} \left[\left(f(x_0)-\hat{f}(x_0) \right)^2 + 2 \epsilon \left(f(x_0)-\hat{f}(x_0) \right) + \epsilon^2 \right] \\
                   & = \text{E} \left[\left(f(x_0)-\hat{f}(x_0) \right)^2\right] + 2\text{E} \left[\epsilon \left(f(x_0)-\hat{f}(x_0) \right) \right]+ \text{E} \left[\epsilon^2\right] && \text{expectations are linear} \\
-                  & = \text{E} \left[f(x_0)- \text{E}\hat{f}(x_0) + \text{E}\hat{f}(x_0) + \hat{f}^2(x_0)\right] + 2\text{E}\left[\epsilon\right] \text{E}\left[\left(f(x_0) - \hat{f}(x_0) \right) \right] + \text{E}\left[\epsilon- \text{E}\left[\epsilon \right] \right]^2 && \text{E}[\epsilon] = 0 \\
+                  & = \text{E} \left[ \left( f(x_0)- \text{E}\hat{f}(x_0) + \text{E}\hat{f}(x_0) + \hat{f}(x_0) \right)^2 \right] + 2\text{E}\left[\epsilon\right] \text{E}\left[\left(f(x_0) - \hat{f}(x_0) \right) \right] + \text{E}\left[\left(\epsilon- \text{E}\left[\epsilon \right]\right)^2 \right] && \text{E}[\epsilon] = 0 \\
                   & = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 + 2 \left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right) + \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + 0 + \sigma_{\epsilon}^2 && \text{E}[\epsilon] = 0 \text{ again} \\
                   & = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 \right] + 2 \text{E}\left[\left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)\right] + \text{E}\left[\left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + \sigma_{\epsilon}^2 && \text{expectations are linear} \\
                   & = \text{Bias}^2\left(\hat{f}(x_0) \right)  + \text{Var}\left(\hat{f}(x_0) \right) + \sigma_{\epsilon}^2 && \text{E}\left[\text{E} \hat{f}(x_0) - \hat{f}(x_0) \mid X = x_0 \right] = 0 \\
@@ -137,26 +137,32 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
   $$
   \begin{align}
   \text{Err}(x_0) & = \text{E} \left[ \left(Y - \hat{f}_k(x_0) \right)^2 \mid X = x_0 \right] \\
-                  & = \sigma_{\epsilon}^2 + \left[ f(x_0) - \frac{1}{k} \sum_{\ell=1}^k f \left(x_{(\ell)} \right)\right] + \frac{\sigma_{\epsilon}^2}{k}
+                  & = \sigma_{\epsilon}^2 + \left[ f(x_0) - \frac{1}{k} \sum_{\ell=1}^k f \left(x_{(\ell)} \right)\right]^2 + \frac{\sigma_{\epsilon}^2}{k}
   \end{align}
   $$
   
   - here we assume that the training inputs $x_i$ are fixed, and the randomness arises from the $y_i$
       - the number of neighbors $k$ is inversely related to the model complexity:
-          - for small $k$, the estiamte $\hat{f}_k(x)$ can potentially adapt itself better to the underlying $f(x)$
+          - for small $k$, the estimate $\hat{f}_k(x)$ can potentially adapt itself better to the underlying $f(x)$
           - as $k$ is increased, the bias -- the squared difference between $f(x_0)$ and the average of $f(x)$ at the $k$-nearest neighbors -- will typically increase, while the variance decreases
   - for a linear model fit $\hat{f}_p(x) = x^T \hat{\beta}$, where the parameter $p$-vector $\beta$ is fit by least squares:
   
   $$
   \begin{align}
-  \text{Err}(x_0) & = \text{E} \left[\left(Y - \hat{f}_p(x_0) \right)^2 \mid X = x_0 \right] \\
-                  & = \sigma_{\epsilon}^2 + \left[f(x_0) - \text{E} \hat{f}_p (x_0)\right]^2 + \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2 \\
+  \text{Err}(x_0) & = \text{E} \left[\left(Y - \hat{f}_p\left(x_0\right) \right)^2 \mid X = x_0 \right] \\
+                  & = \sigma_{\epsilon}^2 + \left[f\left(x_0\right) - \text{E} \hat{f}_p (x_0)\right]^2 + \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2 \\
                   & \\
-                  & \hspace{3em}\mathbf{h}(x_0)  =\mathbf{X} \left(\mathbf{X}^T\mathbf{X} \right) x_0, \quad \text{the }N\text{-vector of linear weights producing the fit:}\\
-                  & \hspace{3em}\hat{f}_p(x_0) = x_0^T \left(\mathbf{X}^T \mathbf{X} \right) \mathbf{X}^T \mathbf{y}, \quad \text{hence,} \\
-                  & \hspace{3em}\text{Var}\left[\hat{f}_p(x_0) \right] = \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2
+                  & \hspace{3em}\mathbf{h}(x_0)  =\mathbf{X} \left(\mathbf{X}^T\mathbf{X} \right)^{-1} x_0, \quad \text{the }N\text{-vector of linear weights producing the fit:}\\
+                  & \hspace{3em}\hat{f}_p(x_0) = x_0^T \left(\mathbf{X}^T \mathbf{X} \right)^{-1} \mathbf{X}^T \mathbf{y}, \quad \text{hence,} \\
+                  & \hspace{3em}\text{Var}\left[\hat{f}_p\left(x_0\right) \right] = \left\lVert \mathbf{h}\left(x_0 \right)\right\rVert^2 \sigma_{\epsilon}^2
   \end{align}
   $$
 
+  - while this variance changes with $x_0$, its average (with $x_0$ taken to be each of the sample values $x_i$) is $\left(\frac{p}{N}\right) \sigma^2_\epsilon$, hence the ***in-sample error*** is:
   
+  $$
+  \frac{1}{N} \sum_{i=1}^n \text{Err} (x_i) = \sigma^2_\epsilon + \frac{1}{N} \sum_{i=1}^N \left[f\left(x_i \right) - \text{E} \hat{f} \left(x_i \right)\right]^2 + \frac{p}{N} \sigma^2_\epsilon
+  $$
+  
+  - here, model complexity is directly related to the number of parameters $p$
   
