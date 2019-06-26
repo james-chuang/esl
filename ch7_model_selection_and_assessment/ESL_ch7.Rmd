@@ -1,9 +1,33 @@
 ---
+title: "Elements of statistical learning Ch. 7 notes"
+author: James Chuang
+date: April 27, 2017
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
 output:
-  html_document:
-    toc: TRUE
-    fig_width: 4.5
-    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+    pdf_document:
+        latex_engine: xelatex
+        toc: true
+        number_sections: false
+        fig_width: 4.5
+        df_print: tibble
+  # html_document:
+  #   toc: TRUE
+  #   fig_width: 4.5
+  #   css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
 ---
 
 My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/~tibs/ElemStatLearn/) Ch. 7 on Model Assessment and Selection
@@ -13,7 +37,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
   - ***generalization*** performance of a learning method: its prediction capability on independent test data
       - guides the choice of learning method or model
       - a measure of the quality of the ultimately chosen model
-      
+
 ## **7.2 Bias, Variance, and Model Complexity**
 
   - Consider the case of a quantitative or interval scale response with:
@@ -22,7 +46,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
       - prediction model $\hat{f}(X)$ estimated from a training set $\tau$
       - a loss function for measuring errors between $Y$ and $\hat{f}(X)$: $L\left(Y, \hat{f}(X) \right)$
           - typical choices:
-          
+
           $$
           L\left(Y, \hat{f}(X)\right) = \begin{cases}
                                         \left(Y-\hat{f}(X) \right)^2 & \text{squared error} \\
@@ -37,10 +61,10 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
           - here the training set $\tau$ is fixed, and the test error is for this specific training set
       - ***expected prediction error***, aka ***expected test error***:
       $$
-      \begin{align}
+      \begin{aligned}
       \text{Err}  & = \text{E} \left[L \left(Y, \hat{f}(X) \right) \right] \\
                   & = \text{E} \left[\text{Err}_{\mathcal{T}} \right]
-      \end{align}
+      \end{aligned}
       $$
           - expectation averages over everything that is random, including randomness in the training set that produced $\hat{f}$
           - goal: estimate $\text{Err}_\tau$. However, $\text{Err}$ is more amenable to statistical analysis
@@ -60,25 +84,25 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
       - then, classify by $\hat{G}(X) = \arg \max_k \hat{p}_k (X)$
           - in some cases (e.g. 1-nearest neighbor classification), $\hat{G}(X)$ is produced directly
       - typical loss functions:
-      
+
       $$
-      \begin{align}
+      \begin{aligned}
       L\left(G, \hat{G}(X) \right)  & = I \left(G \neq \hat{G}(X) \right) && \text{(0-1 loss)} \\
       \\
       L\left(G, \hat{p}(X) \right)  & = -2 \sum_{k=1}^K I \left(G=k \right) \log \hat{p}_k (X) \\
                                     & = -2 \log \hat{p}_G(X) && (-2 \times \text{log-likelihood, aka the } \textbf{deviance})
-      \end{align}
+      \end{aligned}
       $$
       - again, ***test error*** and the expected misclassification error:
       $$
       \text{Err}_{\mathcal{T}} = \text{E} \left[L \left(G, \hat{G}(X) \right) \mid \mathcal{T} \right], \qquad \text{Err}=\text{E} \left[\text{Err}_{\mathcal{T}} \right] \
       $$
       - training error is the sample analogue, e.g.:
-      
+
       $$
-      \begin{align}
+      \begin{aligned}
       \overline{\text{err}} = - \frac{2}{N} \sum_{i=1}^N \log \hat{p}_{g_i}(x_i) && \text{sample log-likelihood for the model}
-      \end{align}
+      \end{aligned}
       $$
       - the log-likelihood can be used as a loss function for general response densities, e.g. Poisson, gamma, exponential, log-normal and others
       - if $\text{Pr}_{\theta(X)}(Y)$ is the density of $Y$, indexed by a parameter $\theta(X)$ that depends on the predictor $X$, then
@@ -102,7 +126,7 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
               - the test set should **only** be brought out at the end of the data analysis
       - methods of this chapter either approximate the validation step analytically (AIC, BIC, MDL, SRM) or by efficient sample re-use (cross-validation and the bootstrap)
           - these methods are used in model selection and also provide an estimate of the test error of the final chosen model
-          
+
 ## **7.3 The Bias-Variance Decomposition**
 
   - Assumptions:
@@ -110,9 +134,9 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
           - $\text{E}[\epsilon] = 0$
           - $\text{Var}(\epsilon) = \sigma_{\epsilon}^2$
   - we can derive an expression for the expected prediction error of a regression fit $\hat{f}(X)$ at an input point $X = x_0$, using squared error loss:
-  
+
   $$
-  \begin{align}
+  \begin{aligned}
                   & \qquad \text{Err}(x_0)\\
                   & = \text{E} \left[\left(Y - \hat{f}(x_0) \right)^2 \mid X = x_0 \right] \\
                   & = \text{E} \left[\left(f(X) + \epsilon - \hat{f}(x_0) \right)^2 \mid X = x_0\right] && Y = f(X) + \epsilon \\
@@ -124,45 +148,45 @@ My notes on [The Elements of Statistical Learning](https://statweb.stanford.edu/
                   & = \text{E} \left[\left(f(x_0)-\text{E}\hat{f}(x_0) \right)^2 \right] + 2 \text{E}\left[\left(f(x_0) - \text{E}\hat{f}(x_0)\right) \left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)\right] + \text{E}\left[\left(\text{E}\hat{f}(x_0)- \hat{f}(x_0) \right)^2\right] + \sigma_{\epsilon}^2 && \text{expectations are linear} \\
                   & = \text{Bias}^2\left(\hat{f}(x_0) \right)  + \text{Var}\left(\hat{f}(x_0) \right) + \sigma_{\epsilon}^2 && \text{E}\left[\text{E} \hat{f}(x_0) - \hat{f}(x_0) \mid X = x_0 \right] = 0 \\
                   & = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}
-  \end{align}
+  \end{aligned}
   $$
-  
+
   - ***squared bias***: the amount by which the average of the estimate differs from the true mean
   - ***variance***: the expected squared deviation of $\hat{f}(x_0)$ around its mean
   - ***irreducible error***: variance of the target around its true mean $f(x_0)$
       - cannot be avoided no matter how well we estimate $f(x_0)$, unless $\sigma_{\epsilon}^2 = 0$
   - typically, the more complex a model $\hat{f}$, the lower the (squared) bias but the higher the variance
   - for $k$-nearest-neighbor regression fit, the error has the simple form:
-  
+
   $$
-  \begin{align}
+  \begin{aligned}
   \text{Err}(x_0) & = \text{E} \left[ \left(Y - \hat{f}_k(x_0) \right)^2 \mid X = x_0 \right] \\
                   & = \sigma_{\epsilon}^2 + \left[ f(x_0) - \frac{1}{k} \sum_{\ell=1}^k f \left(x_{(\ell)} \right)\right]^2 + \frac{\sigma_{\epsilon}^2}{k}
-  \end{align}
+  \end{aligned}
   $$
-  
+
   - here we assume that the training inputs $x_i$ are fixed, and the randomness arises from the $y_i$
       - the number of neighbors $k$ is inversely related to the model complexity:
           - for small $k$, the estimate $\hat{f}_k(x)$ can potentially adapt itself better to the underlying $f(x)$
           - as $k$ is increased, the bias -- the squared difference between $f(x_0)$ and the average of $f(x)$ at the $k$-nearest neighbors -- will typically increase, while the variance decreases
   - for a linear model fit $\hat{f}_p(x) = x^T \hat{\beta}$, where the parameter $p$-vector $\beta$ is fit by least squares:
-  
+
   $$
-  \begin{align}
+  \begin{aligned}
   \text{Err}(x_0) & = \text{E} \left[\left(Y - \hat{f}_p\left(x_0\right) \right)^2 \mid X = x_0 \right] \\
                   & = \sigma_{\epsilon}^2 + \left[f\left(x_0\right) - \text{E} \hat{f}_p (x_0)\right]^2 + \left\lVert \mathbf{h}(x_0)\right\rVert^2 \sigma_{\epsilon}^2 \\
                   & \\
                   & \hspace{3em}\mathbf{h}(x_0)  =\mathbf{X} \left(\mathbf{X}^T\mathbf{X} \right)^{-1} x_0, \quad \text{the }N\text{-vector of linear weights producing the fit:}\\
                   & \hspace{3em}\hat{f}_p(x_0) = x_0^T \left(\mathbf{X}^T \mathbf{X} \right)^{-1} \mathbf{X}^T \mathbf{y}, \quad \text{hence,} \\
                   & \hspace{3em}\text{Var}\left[\hat{f}_p\left(x_0\right) \right] = \left\lVert \mathbf{h}\left(x_0 \right)\right\rVert^2 \sigma_{\epsilon}^2
-  \end{align}
+  \end{aligned}
   $$
 
   - while this variance changes with $x_0$, its average (with $x_0$ taken to be each of the sample values $x_i$) is $\left(\frac{p}{N}\right) \sigma^2_\epsilon$, hence the ***in-sample error*** is:
-  
+
   $$
   \frac{1}{N} \sum_{i=1}^n \text{Err} (x_i) = \sigma^2_\epsilon + \frac{1}{N} \sum_{i=1}^N \left[f\left(x_i \right) - \text{E} \hat{f} \left(x_i \right)\right]^2 + \frac{p}{N} \sigma^2_\epsilon
   $$
-  
+
   - here, model complexity is directly related to the number of parameters $p$
-  
+

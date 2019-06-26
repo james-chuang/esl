@@ -1,14 +1,35 @@
 ---
-title: "Linear Regression by Least Squares"
-output: html_document
+title: "ESL- linear regression notes"
+author: James Chuang
+date: December 19, 2016
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
+output:
+    pdf_document:
+        latex_engine: xelatex
+        toc: false
+        number_sections: false
+        fig_width: 4.5
+        df_print: tibble
+# output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
-
-## Introduction
-lorem ipsum
 
 First, load some libraries and randomly generate $N=50$ data points that are linearly related by $y=10+2x$ with Gaussian noise:
 ```{r}
@@ -27,10 +48,10 @@ Y = matrix((10+2*X) + rnorm(n=N, mean = 0, sd = 3))
 
 Plot the data to see what it looks like:
 ```{r}
-lm.plot = ggplot(data = data.frame(cbind(X,Y)), aes(x=X1, y=X2)) +  # combine X, Y into data frame, plot Y vs X
-            geom_point() +                                          # represent each data point as a point
-            geom_abline(intercept = 10, slope = 2) +                # plot a line showing true Y~X relationship
-            geom_smooth(method=lm, se=FALSE, color="red") +         # plot  the linear regression line
+lm.plot = ggplot(data = data.frame(cbind(X,Y)), aes(x=X1, y=X2)) +
+            geom_point() +                                        
+            geom_abline(intercept = 10, slope = 2) +              
+            geom_smooth(method=lm, se=FALSE, color="red") +
             xlab("X") + ylab("Y")
 lm.plot
 ```
@@ -59,10 +80,10 @@ Typically we have a set of training data $(x_1, y_1)...(x_N, y_N)$ from which to
 The most popular estimation method is *least squares*, in which the coefficients $\beta = (\beta_0, \beta_1,...,\beta_p)^T$ are chosen to minimize the residual sum of squares $\text{RSS}(\beta)$:
 
 $$
-\begin{align}
+\begin{aligned}
 \text{RSS}(\beta) &= \sum_{i=1}^N (y_i-f(x_i))^2 \\
 & = \sum_{i=1}^N (y_i-\beta_0-\sum_{j=1}^p x_{ij}\beta_j)^2
-\end{align}
+\end{aligned}
 $$
 
 If we include the constant variable $1$ in $X$ and include $\beta_0$ in the vector of coefficients $\beta$, $\text{RSS}(\beta)$ can be represented in matrix format, where $\mathbf{X}$ is the $N \times (p+1)$ matrix with each row an input vector (with 1 in the first position), and $\mathbf{y}$ is the $N$-vector of outputs in the training set:
@@ -74,24 +95,24 @@ $$
 This is a quadratic function in the $p+1$ parameters. In order to find the minimum, first differentiate with respect to $\beta$:
 
 $$
-\begin{align}
+\begin{aligned}
 \text{RSS}(\beta) &= \mathbf{y}^T \mathbf{y} - \mathbf{y}^T\mathbf{X}\beta - \beta^T\mathbf{X}^T \mathbf{y} + \beta^T \mathbf{X}^T \mathbf{X} \beta \\
 \text{RSS}(\beta) &= \mathbf{y}^T \mathbf{y} -2\mathbf{y}^T\mathbf{X}\beta + \beta^T \mathbf{X}^T \mathbf{X} \beta \\
 \frac{\partial\text{RSS}}{\partial\beta} & = -2\mathbf{y}^T\mathbf{X} + 2\mathbf{X}^T \mathbf{X} \beta \\
 \frac{\partial\text{RSS}}{\partial\beta} & = -2\mathbf{X}^T\mathbf{y} +2\mathbf{X}^T \mathbf{X} \beta \\
 \frac{\partial\text{RSS}}{\partial\beta} & = -2\mathbf{X}^T(\mathbf{y}-\mathbf{X} \beta) \\
 \frac{\partial\text{RSS}}{\partial\beta\partial\beta^T} & = 2\mathbf{X}^T \mathbf{X} \\
-\end{align}
+\end{aligned}
 $$
 
 Assuming that $\mathbf{X}$ has full column rank, then $\mathbf{X}^T\mathbf{X}$ is positive definite. This means that the quadratic function $\text{RSS}(\beta)$ is strictly convex, and so has a unique global minimum that we can solve for (in the univariate case, this is finding the minimum of a convex parabola). The position of the minimum can be found by setting the first derivative/gradient to zero:
 
 $$
-\begin{align}
+\begin{aligned}
 \frac{\partial\text{RSS}}{\partial\beta} = -2\mathbf{X}^T(\mathbf{y}-\mathbf{X} \beta) &= 0\\
 2\mathbf{X}^T\mathbf{X}\beta & = 2\mathbf{X}^T\mathbf{y} \\
 \hat\beta & = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T \mathbf{y}
-\end{align}
+\end{aligned}
 $$
 
 We can use this to calculate the least squares estimate for $\hat{\beta}$
@@ -106,10 +127,12 @@ You can check that these coefficients are the same as those output by R's linear
 
 Here's a small aside in R to illustrate what least squares did. The code is not so important for understanding the points below.
 ```{r}
-beta = as.matrix(expand.grid(x=seq(7,13,by=0.3), y = seq(1.7,2.3, by=0.1)))  #generate matrix of beta vectors
+#generate matrix of beta vectors
+beta = as.matrix(expand.grid(x=seq(7,13,by=0.3), y = seq(1.7,2.3, by=0.1)))  
 Y.broadcast = matrix(Y, nrow=N, ncol=dim(beta)[1])
 
-RSS = diag(t(Y.broadcast-X.int%*%t(beta)) %*% (Y.broadcast-X.int%*%t(beta))) #calculate RSS for each beta
+#calculate RSS for each beta
+RSS = diag(t(Y.broadcast-X.int%*%t(beta)) %*% (Y.broadcast-X.int%*%t(beta)))
 RSS.data = data.frame(cbind(beta, matrix(RSS)))
 names(RSS.data) = c("beta0","beta1","RSS")
 
@@ -117,7 +140,10 @@ RSS.plot = ggplot(data = RSS.data, aes(x=beta0, y=beta1, z = RSS, fill=RSS)) +
                     geom_raster(interpolate=TRUE) +
                     geom_contour(color="white") +
                     geom_point(x=10, y=2, shape=4, size=3, color="white") +
-                    geom_point(x=coef(lm.fit)[1], y=coef(lm.fit)[2], size=3, color="white") +
+                    geom_point(x=coef(lm.fit)[1],
+                               y=coef(lm.fit)[2],
+                               size=3,
+                               color="white") +
                     scale_fill_viridis()
 RSS.plot
 ```
@@ -138,18 +164,18 @@ $$
 $$
 Therefore, $\hat{\beta}$ is also normally distributed, with mean
 $$
-\begin{align}
+\begin{aligned}
 \mathbf{E}[\hat{\beta}]& =(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{X}\beta \\
 \mathbf{E}[\hat{\beta}]& = \beta
-\end{align}
+\end{aligned}
 $$
 and variance
 $$
-\begin{align}
+\begin{aligned}
 \text{Var}(\hat{\beta})& = \sigma^2 (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T ((\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T)^T \\
 \text{Var}(\hat{\beta})& = \sigma^2 (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T \mathbf{X}((\mathbf{X}^T \mathbf{X})^{-1})^T \\
 \text{Var}(\hat{\beta})& = \sigma^2 (\mathbf{X}^T \mathbf{X})^{-1}
-\end{align}
+\end{aligned}
 $$
 
 Typically, the population measure $\sigma^2$ is unknown, so we estimate it by the sample variance $\hat{\sigma}^2$
@@ -172,7 +198,8 @@ $$
 v = diag(solve(t(X.int)%*%X.int)) #calculate the matrix (X^T X)^-1
 beta.std.err = (sample.var*v)^.5  #calculate standard errors, the denominator of the t-scores
 beta.tstat = beta.hat/beta.std.err #calculate the t-scores
-beta.tprob = 2*pt(q=beta.tstat, df=(N-p-1), lower.tail=FALSE) #get 2-tailed probability from t distribution
+##get 2-tailed probability from t distribution
+beta.tprob = 2*pt(q=beta.tstat, df=(N-p-1), lower.tail=FALSE) 
 
 print(beta.std.err)
 print(beta.tstat)
@@ -194,7 +221,8 @@ where $\text{RSS}_1$ is the residual sum-of-squares for the last squares fit of 
 Y.mean = apply(Y, 2, mean)  #smaller model using only the intercept
 RSS.null = t(Y-Y.mean) %*% (Y-Y.mean) #RSS of smaller model
 beta.fstat = ((RSS.null-RSS.full)/(p-0))/(RSS.full/(N-p-1)) #F-statistic full vs null models
-beta.fprob = pf(q=beta.fstat, df1 = p-0, df2 = N-p-1, lower.tail=FALSE) #get probabilty from F-distribution
+#get probability from F-distribution
+beta.fprob = pf(q=beta.fstat, df1 = p-0, df2 = N-p-1, lower.tail=FALSE)
 
 print(beta.fstat)
 print(beta.fprob)

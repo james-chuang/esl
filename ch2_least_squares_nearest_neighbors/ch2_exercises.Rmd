@@ -1,8 +1,32 @@
 ---
+title: "Elements of statistical learning Ch. 2 exercises"
+author: James Chuang
+date: December 20, 2016
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
 output:
-  html_document:
-    fig_width: 5
-    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+    pdf_document:
+        latex_engine: xelatex
+        toc: true
+        number_sections: false
+        fig_width: 5
+        df_print: tibble
+  # html_document:
+  #   fig_width: 5
+  #   css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
 ---
 
 **Ex. 2.1** Suppose each of $K$-classes has an associated target $t_k$, which is a vector of all zeros, except for a one in the $k$th position. Show that classifying to the largest element of $\hat y$ amounts to choosing the closest target, $\min_k \lVert t_k-\hat y\rVert$, if the elements of $\hat y$ sum to one.
@@ -10,7 +34,7 @@ output:
 The problem, restated: Show that $\underset{k}{\text{argmin}} \lVert t_k- \hat y\rVert = \underset{k}{\text{argmax}}(y_k)$ subject to :
 
 $$
-\begin{align}
+\begin{aligned}
 & \quad \underset{k}{\text{argmin}} \lVert t_k - \hat y \rVert \\
 & = \underset{k}{\text{argmin}} \lVert t_k - \hat y \rVert^2                & x \to x^2 \text{ is monotonic}  \\
 & = \underset{k}{\text{argmin}} \sum_{i=1}^k \left(y_i - (t_k)_i \right)^2  & \text{definition of norm, ignoring } \sqrt{} \text{ due to argmin}     \\
@@ -19,23 +43,21 @@ $$
 & = \underset{k}{\text{argmin}} \left(-2y_k + 1 \right)   & \sum_{i=1}^k y_i(t_k)_i=y_k, \quad \sum_{i=1}^k (t_k)_i^2 = 1               \\
 & = \underset{k}{\text{argmin}} \left(-2y_k \right)                                                           \\
 & = \underset{k}{\text{argmax}} \left(y_k \right)
-\end{align}
+\end{aligned}
 $$
 
 **Ex 2.2** Show how to compute the Bayes decision boundary for the simulation example in Figure 2.5.
 
 The simulation draws $10$ points $p_1, \dots, p_{10} \in \mathbb{R}^2$ from $N\left(\begin{bmatrix}1 \\0 \end{bmatrix}, I_2 \right)$ and 10 points $q_1, \dots, q_{10} \in \mathbb{R}^2$ from $N \left(\begin{bmatrix}0 \\ 1 \end{bmatrix}, I_2 \right)$. These points $p_i$ and $q_j$ we assume to be fixed, and are used as the means of normal distributions with covariance matrix $I_2/5$. The Bayes decision boundary is found by equating the likelihoods of a point being generated from the blue generating function and the orange generating function:
+
 $$
-\begin{align}
+\begin{aligned}
 P(\text{blue}) & = P(\text{orange}) \\
 \sum_i \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{p}_i)\right)} & = \sum_j \frac{1}{\sqrt{\lvert 2\pi \Sigma \rvert}} \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{q}_j)\right)} \\
 \sum_i  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{p}_i)\right)} & = \sum_j  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \mathbf{\Sigma}^{-1} (\mathbf{x}-\mathbf{q}_j)\right)} \\
-
 \sum_i  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{p}_i)^T \left(\frac{5}{\mathbf{I}_2}\right) (\mathbf{x}-\mathbf{p}_i)\right)} & = \sum_j  \exp{\left(-\frac{1}{2} (\mathbf{x}-\mathbf{q}_j)^T \left(\frac{5}{\mathbf{I}_2} \right) (\mathbf{x}-\mathbf{q}_j)\right)} \\
-
-\sum_i  \exp{\left( \frac{-5 \lVert \mathbf{p}_i -\mathbf{x}\rVert^2}{2}  \right)} & = \sum_j  \exp{\left( \frac{-5 \lVert \mathbf{q}_j -\mathbf{x}\rVert^2}{2}  \right)} \\
-
-\end{align}
+\sum_i  \exp{\left( \frac{-5 \lVert \mathbf{p}_i -\mathbf{x}\rVert^2}{2}  \right)} & = \sum_j  \exp{\left( \frac{-5 \lVert \mathbf{q}_j -\mathbf{x}\rVert^2}{2}  \right)}
+\end{aligned}
 $$
 
 **Ex 2.3** Derive equation (2.24).
@@ -47,7 +69,7 @@ $$
 
 Let $r = \text{median distance}$.
 $$
-\begin{align}
+\begin{aligned}
 \frac{1}{2} & = P(\text{all } N \text{ points are further than } r \text{ from the origin})     & \text{definition of the median} \\
 \frac{1}{2} & = \prod_{i=1}^{N}P(\lVert x_i\rVert > r)                                          & \text{each point is assumed to be independent} \\
 \frac{1}{2} & = \prod_{i=1}^{N}\left[1-P\left(\lVert x_i\rVert \leq r \right) \right]                                                           \\
@@ -57,7 +79,7 @@ $$
 1-r^p & = \left(\frac{1}{2} \right)^{\frac{1}{N}}               \\
 r^p & = 1- \left(\frac{1}{2} \right)^{\frac{1}{N}}              \\
 r & = \left[1- \left(\frac{1}{2} \right)^{\frac{1}{N}} \right]^{\frac{1}{p}}
-\end{align}
+\end{aligned}
 $$
 **Ex 2.4** The edge effect problem discussed on page 23 is not peculiar to uniform sampling from bounded domains. Consider inputs drawn from a spherical multinormal distribution $X \sim N(0, \mathbf{I}_p)$. The squared distance from any sample point to the origin has a $\chi_p^2$ distribution with mean $p$. Consider a prediction point $x_0$ drawn from this distribution, and let $a = x_0/\lVert x_0 \rVert$ be an associated unit vector. Let $z_i=a^T x_i$ be the projection of each of the training points on this direction.
 

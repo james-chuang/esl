@@ -1,9 +1,33 @@
 ---
+title: "Elements of statistical learning Ch. 2 notes"
+author: James Chuang
+date: December 28, 2016
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
 output:
-  html_document:
-    toc: TRUE
-    fig_width: 5
-    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+    pdf_document:
+        latex_engine: xelatex
+        toc: true
+        number_sections: false
+        fig_width: 5
+        df_print: tibble
+  # html_document:
+  #   toc: TRUE
+  #   fig_width: 5
+  #   css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
 ---
 
 ```{r setup, include=FALSE}
@@ -31,23 +55,23 @@ oracle = function(npoints){
   #set mean vectors for blue and orange m_k:
   blue.mu = c(1,0)
   og.mu = c(0,1)
-  
+
   #choose m_k for blue and orange
   blue.means = as_data_frame(mvrnorm(n=10, mu=blue.mu, Sigma=diag(2)))
   blue.means$color = factor(rep(0,nrow(blue.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
   og.means = as_data_frame(mvrnorm(n=10, mu=og.mu, Sigma=diag(2)))
   og.means$color = factor(rep(1, nrow(og.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
-  
+
   #randomly choose npoints number of m_k for blue and orange
   blue.randmean = blue.means[sample(1:nrow(blue.means),npoints, replace = TRUE),1:2]
   og.randmean = og.means[sample(1:nrow(og.means),npoints, replace = TRUE),1:2]
-  
+
   #generate datapoints from MVrandom normal with means chosen above
   blue.data = as_data_frame(t(apply(blue.randmean, MARGIN=1, function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
   og.data = as_data_frame(t(apply(og.randmean, MARGIN=1, function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
   blue.data$color = factor(rep(0, nrow(blue.data)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
   og.data$color = factor(rep(1, nrow(og.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
-  
+
   #return plotdata, a dataframe containing training data
   #return meandata, a dataframe containing the generating m_k
   return(list(plotdata = rbind(blue.data, og.data), meandata = rbind(blue.means, og.means)))
@@ -173,7 +197,7 @@ $$
 \hat Y (x) = \frac{1}{k} \sum_{x_i \in N_k(x)} y_i
 $$
 
-, where $N_k(x)$ is the neighborhood of $x$ defined by the $k$ closest points $x_i$ in the training sample, defined by Euclidean distance. In words, to classify a new point, $k$NN finds the $k$ closest points in the training data (a neighborhood), and classifies to the most abundant class in the neighborhood. 
+, where $N_k(x)$ is the neighborhood of $x$ defined by the $k$ closest points $x_i$ in the training sample, defined by Euclidean distance. In words, to classify a new point, $k$NN finds the $k$ closest points in the training data (a neighborhood), and classifies to the most abundant class in the neighborhood.
 
 
 ```{r, fig.align='center', fig.cap=c('1-nearest neighbor classification.','15-nearest neighbor classification.')}
@@ -185,11 +209,11 @@ $$
 myknn = function(xnew, x, y, k){
   N.new = nrow(xnew)
   ynew = numeric(N.new)
-  
+
   allpoints = rbind(xnew, x)
   dmatrix = as.matrix(dist(allpoints))[seq(N.new+1, nrow(allpoints)),seq(1, N.new)]
   rownames(dmatrix) = 1:length(y)
-  
+
   for (i in 1:N.new){
     dist.vector = dmatrix[,i]
     dist.sorted = sort(dist.vector)
@@ -210,7 +234,7 @@ plotknn = function(k){
   knn.pred = ifelse(knn.yhat>0.5,"ORANGE","BLUE")
   knn.plotdata = as_data_frame(cbind(x.new, knn.pred))
   boundary.data = as_data_frame(cbind(x.new, knn.yhat))
-    
+
   c = ggplot() +
         geom_point(data=knn.plotdata, aes(x=V1, y=V2, color=knn.pred), size=0.05) +
         geom_point(data=train$plotdata, aes(x=V1,y=V2, color=color), shape=21, size=2, stroke=1) +

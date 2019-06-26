@@ -1,9 +1,33 @@
 ---
+title: "ESL- bias-variance decomposition notes"
+author: James Chuang
+date: December 28, 2016
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
 output:
-  html_document:
-    toc: TRUE
-    fig_width: 4.5
-    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+    pdf_document:
+        latex_engine: xelatex
+        toc: false
+        number_sections: false
+        fig_width: 4.5
+        df_print: tibble
+  # html_document:
+  #   toc: TRUE
+  #   fig_width: 4.5
+  #   css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
 ---
 
 # **Bias-variance decomposition**
@@ -16,24 +40,24 @@ Y = f(X) = e^{-8 \lVert X\rVert^2}
 $$
 , without any measurement error. We use the 1-nearest neighbor rule to predict $y_0$ at the test-point $x_0=0$. Denote the training set by $\tau$. We can then compute the expected prediction error at $x_0$ for our procedure, averaging over all such samples of size 1000. Since the problem is deterministic, this is the mean squared error (MSE) for estimating $f(0)$:
 $$
-\begin{align}
+\begin{aligned}
 \text{MSE}(x_0) & = \text{E}_\tau\left[f(x_0) - \hat y_0 \right]^2 \\
                 & = \text{E}_\tau\left[\hat y_0 - f(x_0) \right]^2 \\
                 & = \text{E}_\tau\left[\hat y_0 - \text{E}_\tau\left[\hat y_0 \right] + \text{E}_\tau\left[\hat y_0 \right] -\hat y_0 \right]^2 \\
                 & = \text{E}_\tau\left[y_0 - \text{E}_\tau[\hat y_0] \right]^2 + 2\text{E}_\tau\left[\left(\hat y_0-\text{E}_\tau[\hat y_0] \right)\left(\text{E}_\tau\left[\hat y_0 \right] - f(x_0) \right) \right] + \text{E}_\tau\left[\text{E}_\tau\left[\hat y_0 \right] - f(x_0)\right]^2 \\
                 & = \text{Var}_\tau(\hat y_0) + 2\text{E}_\tau\left[\left(\hat y_0-f(x_0) \right)\left(f(x_0) - f(x_0) \right) \right] + \text{Bias}_{\tau}^2(\hat y_0)\\
                 & = \text{Var}_\tau(\hat y_0) + \text{Bias}_{\tau}^2(\hat y_0)
-\end{align}
+\end{aligned}
 $$
 
 Another way:
 $$
-\begin{align}
+\begin{aligned}
 \text{MSE}(x_0) & = \text{E}_\tau\left[f(x_0) - \hat y_0 \right]^2 \\
                 & = \text{E}_\tau\left[f^2(x_0) -2f(x_0)\hat y_0 + \hat y_0^2\right] \\
                 & = \text{E}_\tau\left[f^2(x_0) \right] - \text{E}_\tau \left[2f(x_0)\hat y_0 \right] + \text{E}_\tau \left[\hat y_0 \right] \\
                 & = \text{Var}_\tau(f(x_0)) + \left(\text{E}_\tau \left[f(x_0) \right] \right)^2 - 2f(x_0)\text{E}_\tau \left[\hat y_0 \right] + \text{Var}_\tau(\hat y_0) + \left(\text{E}_\tau \left[\hat y_0 \right] \right)^2 \\
                 & = \text{Var}_\tau\left(f(x_0) \right) + \text{Var}_\tau(\hat y_0) + \left[\text{E}_\tau (\hat y_0 - f(x_0))\right]^2 \\
                 & = \sigma^2 + \text{Var}_\tau(\hat y_0) + \text{Bias}^2(y_0)
-\end{align}
+\end{aligned}
 $$

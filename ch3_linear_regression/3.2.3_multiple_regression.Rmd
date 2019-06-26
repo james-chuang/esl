@@ -1,12 +1,36 @@
 ---
+title: "ESL- multiple linear regression notes"
+author: James Chuang
+date: December 21, 2016
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
 output:
-  html_document:
-    fig_width: 5
-    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+    pdf_document:
+        latex_engine: xelatex
+        toc: false
+        number_sections: false
+        fig_width: 5
+        df_print: tibble
+  # html_document:
+  #   fig_width: 5
+  #   css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE)
 ```
 
 The linear model $f(X) = \beta_0 + \sum_{j=1}^p X_j \beta_j$ with $p > 1$ inputs is called the ***multiple linear regression model***. The least squares estimates $\hat\beta = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}$ for this model are best understood in terms of the estimates for the ***univariate*** linear model.
@@ -17,10 +41,10 @@ Y = X \beta + \epsilon
 $$
 . In the univariate case, the least squares estimate and residuals can be written as inner products:
 $$
-\begin{align}
+\begin{aligned}
 \hat \beta & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} & \text{in the univariate case is} \\
 \hat \beta & = \frac{\langle \mathbf{x}, \mathbf{y} \rangle}{\langle \mathbf{x}, \mathbf{x} \rangle} \\
-\end{align}
+\end{aligned}
 $$
 
 $$
@@ -29,7 +53,7 @@ $$
 . This simple univariate regression provides the building block for multiple linear regression. Suppose next that the inputs $\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_p$ (the columns of the data matrix $X$) are orthogonal, i.e. $\langle \mathbf{x}_j,\mathbf{x}_k \rangle = 0$ for all $j \neq k$. Then, the multiple least squares estimates $\hat \beta_j$ are equal to the univariate estimates $\langle \mathbf{x}_j, \mathbf{y}\rangle/ \langle \mathbf{x}_j, \mathbf{x}_j \rangle$:
 
 $$
-\begin{align}
+\begin{aligned}
 \hat \beta & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
 \hat \beta & =  \left(\begin{bmatrix}
                 - & \mathbf{x}_1  & - \\
@@ -92,7 +116,7 @@ $$
               \vdots                                  \\
               \frac{\langle \mathbf{x}_p, \mathbf{y}\rangle}{\langle \mathbf{x}_p, \mathbf{x}_p \rangle}
               \end{bmatrix} \\
-\end{align}
+\end{aligned}
 $$
 I.e., when the inputs are orthogonal, they have no effect on each other's parameter estimates in the model.
 
@@ -106,11 +130,11 @@ $$
 
 
 $$
-\begin{align}
+\begin{aligned}
 \hat \beta  & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
             & = \left(\begin{bmatrix}
             - & \mathbf{1}    & - \\
-            - & \mathbf{x}_1  & - 
+            - & \mathbf{x}_1  & -
             \end{bmatrix}
             \begin{bmatrix}
             \mid        & \mid          \\
@@ -120,7 +144,7 @@ $$
             \right)^{-1}
             \begin{bmatrix}
             - & \mathbf{1}    & - \\
-            - & \mathbf{x}_1  & - 
+            - & \mathbf{x}_1  & -
             \end{bmatrix}
             \mathbf{y} \\
         & = \begin{bmatrix}
@@ -131,19 +155,14 @@ $$
             \langle \mathbf{1}, \mathbf{y} \rangle \\
             \langle \mathbf{x}, \mathbf{y} \rangle
             \end{bmatrix} \\
-            
         & = \\
-        
         & = \\
-            
-        & = \langle \quad \rangle\langle \mathbf{1}, \mathbf{y}\rangle + \langle \quad \rangle \langle \mathbf{x}, \mathbf{y}\rangle        \\    
+        & = \langle \quad \rangle\langle \mathbf{1}, \mathbf{y}\rangle + \langle \quad \rangle \langle \mathbf{x}, \mathbf{y}\rangle        \\
         & = \frac{-\langle \mathbf{x}_1,\mathbf{1} \rangle \langle \mathbf{1}, \mathbf{y} \rangle + \langle \mathbf{1}, \mathbf{1} \rangle \langle \mathbf{x}_1, \mathbf{y} \rangle}{\langle \mathbf{1}, \mathbf{1}\rangle\langle \mathbf{x}_1, \mathbf{x}_1 \rangle- \langle \mathbf{x}_1, \mathbf{1}\rangle \langle \mathbf{1}, \mathbf{x}_1\rangle}\\
-        
         & = \frac{- \sum_i x_i \sum_i y_i + N \sum_i x_i y_i}{N \sum_i x_i^2- \sum_i x_i \sum_i x_i}\\
-        
         & =  \frac{\langle \mathbf{x}- \left(\frac{\sum_i x_i}{N} \right)\mathbf{1}, \mathbf{y}\rangle}{\langle \mathbf{x}- \left(\frac{\sum_i x_i}{N} \right) \mathbf{1},\mathbf{x}- \left(\frac{\sum_i x_i}{N} \right) \mathbf{1}\rangle}  \\
         & = \frac{\langle \mathbf{x}- \bar x \mathbf{1}, \mathbf{y}\rangle}{\langle \mathbf{x}- \bar x \mathbf{1},\mathbf{x}- \bar x \mathbf{1}\rangle}
-\end{align}
+\end{aligned}
 $$
 
 
@@ -178,7 +197,7 @@ If $\mathbf{x}_p$ is highly corelated with some of the other $\mathbf{x}_k$'s, t
 
 We can also obtain an alternate formula for the variance estimates of the coefficients:
 $$
-\text{Var}(\hat \beta_p) = \frac{\sigma^2}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle} = \frac{\sigma^2}{\lVert \mathbf{z}_p\rVert^2} 
+\text{Var}(\hat \beta_p) = \frac{\sigma^2}{\langle \mathbf{z}_p, \mathbf{z}_p \rangle} = \frac{\sigma^2}{\lVert \mathbf{z}_p\rVert^2}
 $$
 
 . In other words, the precision with which we can estimate $\hat \beta_p$ depends on the length of the residual vector $\mathbf{z}_p$; this represents how much of $\mathbf{x}_p$ is unexplained by the other $\mathbf{x}_k$'s.
@@ -189,7 +208,7 @@ $$
 $$
 , where $\mathbf{z}_j$ has as columns the $\mathbf{z}_j$ (in order), and $\mathbf{\Gamma}$ is the upper triangular matrix with entries $\hat \gamma_{kj}$. I.e.:
 $$
-\mathbf{X} = 
+\mathbf{X} =
 \mathbf{Z \Gamma} = \begin{bmatrix}
                     \mid          & \mid          &         & \mid          \\
                     \mathbf{z}_0  & \mathbf{z}_1  & \cdots  & \mathbf{z}_p  \\
@@ -199,25 +218,24 @@ $$
                     \gamma_{0,0}  & \gamma_{0,1}  & \cdots  & \gamma_{0,p}  \\
                     0             & \gamma_{1,1}  & \cdots  & \gamma_{1,p}  \\
                     \vdots        & \vdots        & \ddots  & \cdots        \\
-                    0             & 0             & \cdots  & \gamma_{p,p}  
+                    0             & 0             & \cdots  & \gamma_{p,p}
                     \end{bmatrix}
 $$
 
 Introducing the diagonal matrix $\mathbf{D}$ with $j$th diagonal entry $D_{j,j} = \lVert \mathbf{z}_j \rVert$, we get:
 
 $$
-\begin{align}
+\begin{aligned}
 \mathbf{X}  & = \mathbf{ZD}^{-1}\mathbf{D \Gamma} \\
             & = \mathbf{QR}
-
-\end{align}
+\end{aligned}
 $$
 
 , the so-called $QR$ decomposition of $\mathbf{X}$. Here $\mathbf{Q}$ is an $N \times (p + 1)$ orthogonal matrix, $\mathbf{Q}^T \mathbf{Q}=\mathbf{I}$, and $\mathbf{R}$ is a $(p+1) \times (p+1)$ upper triangular matrix.
 
 The $\mathbf{QR}$ decomposition represents a convenient orthogonal basis for the column space of $\mathbf{X}$. For example, the least squares solution is given by:
 $$
-\begin{align}
+\begin{aligned}
 \hat\beta         & = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} \\
                   & = \left[(\mathbf{QR})^T(\mathbf{QR}) \right]^{-1} (\mathbf{QR})^T \mathbf{y} \\
                   & = \left[\mathbf{R}^T \mathbf{Q}^T \mathbf{Q} \mathbf{R}\right]^{-1} \mathbf{R}^T \mathbf{Q}^T \mathbf{y} \\
@@ -227,7 +245,7 @@ $$
 \hat{\mathbf{y}}  & = \mathbf{X}\hat \beta \\
                   & = \left(\mathbf{QR}\right)\left(\mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y} \right) \\
 \hat{\mathbf{y}}  & = \mathbf{QQ}^T\mathbf{y}
-\end{align}
+\end{aligned}
 $$
 
 $\hat\beta = \mathbf{R}^{-1} \mathbf{Q}^T \mathbf{y}$ is easy to solve because $\mathbf{R}$ is upper triangular.

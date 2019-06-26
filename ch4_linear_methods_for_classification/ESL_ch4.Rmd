@@ -1,9 +1,33 @@
 ---
+title: "Elements of statistical learning Ch. 4 notes"
+author: James Chuang
+date: February 3, 2017
+mainfont: FreeSans
+linkcolor: "purple"
+header-includes:
+    \usepackage{enumitem}
+    \setlistdepth{9}
+    \setlist[itemize,1]{label=$\bullet$}
+    \setlist[itemize,2]{label=$\bullet$}
+    \setlist[itemize,3]{label=$\bullet$}
+    \setlist[itemize,4]{label=$\bullet$}
+    \setlist[itemize,5]{label=$\bullet$}
+    \setlist[itemize,6]{label=$\bullet$}
+    \setlist[itemize,7]{label=$\bullet$}
+    \setlist[itemize,8]{label=$\bullet$}
+    \setlist[itemize,9]{label=$\bullet$}
+    \renewlist{itemize}{itemize}{9}
 output:
-  html_document:
-    toc: TRUE
-    fig_width: 4.5
-    css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
+    pdf_document:
+        latex_engine: xelatex
+        toc: true
+        number_sections: false
+        fig_width: 4.5
+        df_print: tibble
+  # html_document:
+  #   toc: TRUE
+  #   fig_width: 4.5
+  #   css: /home/ebosi/github/james-chuang.github.io/_sass/_style.scss
 ---
 
 ## **4.1 Introduction**
@@ -17,14 +41,14 @@ Several different ways to find linear decision boundaries:
       - This regression approach is a member of a class of methods that model ***discriminant functions*** $\delta_k(x)$ for each class, and then classify $x$ to the class with the largest value for its discriminant function.
           - Methods that model the posterior probabilities $P(G=k \mid X=x)$ are also in this class. If either the $\delta_k(x)$ or $P(G=k \mid X=x)$ are linear in $x$, then the decision boundaries will be linear.
               - This remains true for monotone transformations of $\delta_k(x)$ or $P(G=k \mid X=x)$. For example, in two-class classification, a popular model for the posterior probabilities is
-              
+
               $$
-              \begin{align}
+              \begin{aligned}
               P(G=1 \mid X=x) & = \frac{\exp \left(\beta_0 + \beta^T x \right)}{1+ \exp \left(\beta_0 + \beta^T x \right)}, \\
               P(G=2 \mid X=x) & = \frac{1}{1+\exp \left(\beta_0 + \beta^T x \right)}
-              \end{align}
+              \end{aligned}
               $$
-              
+
               - The monotone transformation used here is the ***logit*** transformation: $\log \left[\frac{p}{1-p} \right]$ (the inverse of the logistic sigmoid function)
               $$
               \log \frac{P(G=1 \mid X=x)}{P(G=2 \mid X=x)} = \beta_0 + \beta^T x
@@ -33,7 +57,7 @@ Several different ways to find linear decision boundaries:
               - Two popular but different methods resulting in linear log-odds or logits: ***linear discriminant analysis*** and ***linear logistic regression***. The essential difference between the two is in the way the linear function is fit to the training data.
       - A more direct approach: explicitly model the boundaries between the classes as linear. For two classes, this amounts fo modeling the decision boundary as a hyperplane. Two methods for this: the ***perceptron*** model, which finds a separating hyperplane in the data, if it exists, and a method for finding an ***optimally separating hyperplane*** if one exists, or else a hyperplane that minimizes some measure of overlap in the training data.
       - The linear approaches in this chapter can be generalized with basis expansions.
-      
+
 ## **4.2 Linear Regression of an Indicator Matrix**
 
 Code response in an ***indicator response matrix*** $\mathbf{Y}$, an $N \times K$ matrix of $N$ training instances, where $Y_k = 1$ if $G = k$, else $0$. Fit a linear regression model to each of the columns of $\mathbf{Y}$ simultaneously. The fit is given by
@@ -43,13 +67,13 @@ $$
 , where the $(p+1) \times K$ coefficient matrix $\mathbf{B} = \left(\mathbf{X}^T \mathbf{X} \right)^{-1} \mathbf{X}^T \mathbf{Y}$.
 
 A new observation with input $x$ is classified as follows:
-  
+
   - compute the fitted output $\hat f(x)^T = (1, x^T)\hat{\mathbf{B}}$, a $K$ vector;
   - identify the largest component and classify accordingly:
   $$
   \hat{G}(x) = \text{argmax}_{k \in G} \hat f_k(x)
   $$
-  
+
 ?????????????????????
 pg.104
 
@@ -73,7 +97,7 @@ $$
 Linear discriminant analysis (LDA) arises in the special case when we assume that the classes have a common covariance matrix $\Sigma_k = \Sigma  \forall k$. In comparing two classes $k$ and $l$, it is sufficient to look at the log-ratio:
 
 $$
-\begin{align}
+\begin{aligned}
 & \qquad \log \frac{P(G=k \mid X=x)}{P(G=k \mid X=x)}  \\
 & = \log \frac{f_k(x) \pi_k}{f_\ell(x) \pi_\ell} \\
                                               & = \log \frac{f_k(x)}{f_\ell(x)} + \log \frac{\pi_k}{\pi_\ell} \\
@@ -81,7 +105,7 @@ $$
                                               & = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}\left(x-\mu_k \right)^T \Sigma^{-1}\left(x-\mu_k \right) + \frac{1}{2} \left(x-\mu_\ell \right)^T \Sigma^{-1} \left(x-\mu_\ell \right) \\
                                               & = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}x^T\Sigma^{-1}x + x^T \Sigma^{-1}\mu_k - \frac{1}{2}\mu_k^T \Sigma^{-1} \mu_k + \frac{1}{2}x^T\Sigma^{-1}x - x^T \Sigma^{-1}\mu_\ell + \frac{1}{2} \mu_\ell^T \Sigma^{-1} \mu_\ell \quad \text{Quadratic parts cancel}\\
                                               & = \log \frac{\pi_k}{\pi_\ell} - \frac{1}{2}\left(\mu_k-\mu_\ell \right)^T \Sigma^{-1}\left(\mu_k-\mu_\ell \right) + x^T \Sigma^{-1}(\mu_k - \mu_\ell)
-\end{align}
+\end{aligned}
 $$
 This equation for log-odds is linear in $x$, implying that the decision boundary between $k$ and $l$ is linear in $x$, and in $p$ dimensions is a hyperplane.
 
@@ -97,29 +121,29 @@ QDA arises in the case that the classes do not have common covariance matrices, 
 ## **4.4 Logistic Regression**
 Logistic regression- model the posterior probabiltiies of the $K$ classes via linear functions in $x$, while ensuring that they sum to one and remain in $[0,1]$ (so that they can be interepreted as probabilties). The model:
 $$
-\begin{align}
+\begin{aligned}
 \log\frac{P(G=1 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{10} + \beta_1^Tx \\
 \log\frac{P(G=2 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{20} + \beta_2^Tx \\
                                             & \vdots                    \\
 \log\frac{P(G=K-1 \mid X=x)}{P(G=K \mid X=x)} & = \beta_{(K-1)0} + \beta_{K-1}^Tx
-\end{align}
+\end{aligned}
 $$
 The model is specified in terms of $K-1$ log-odds or logit transformations (reflecting the constraint that the probabilities sum to one, so the $K$th probability is determined by the previous $K-1$). From the log-odds above, we can calculate the probability of the last ($K$th) class:
 $$
-\begin{align}
+\begin{aligned}
 P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=\ell \mid X=x) \\
 P(G=K \mid X=x) & = 1-\sum_{\ell=1}^{K-1}P(G=K \mid X=x)\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
 P(G=K \mid X=x) & = 1-P(G=K \mid X=x)\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \\
 P(G=K \mid X=x) \left[1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right) \right] & = 1 \\
 P(G=K \mid X=x) & = \frac{1}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
-\end{align}
+\end{aligned}
 $$
 and the probability for any class $k$:
 $$
-\begin{align*}
+\begin{aligned}
 P(G=k \mid X=x) & = P(G=K \mid X=x) \exp\left(\beta_{k0}+ \beta_k^Tx \right) \\
 P(G=k \mid X=x) & = \frac{\exp\left(\beta_{k0}+ \beta_k^Tx \right)}{1+\sum_{\ell=1}^{K-1}\exp\left(\beta_{\ell 0} + \beta_{\ell}^Tx \right)}
-\end{align*}
+\end{aligned}
 $$
 These probabilities sum to one as expected. The model uses the last class $K$ as the denominator in the odds-ratios, however, the choice of the class to use as the denominator is arbitrary in that the estimates don't change by this choice. To emphasize the dependence on the entire parameter set $\theta = \{\beta_{10}, \beta_1^T, \dots, \beta_{(K-1)0}, \beta_{K-1}^T\}$, we denote the probabilities $P(G=k \mid X=x) = p_k(x;\theta)$.
 
@@ -129,33 +153,33 @@ $$
 $$
 , where $p_k(x_i; \theta) = P(G=k \mid X=x_i; \theta)$. Taking the two-class case, since the algorithms simplify considerably. Code the two-class $g_i$ via a $0/1$ response $y_i$, where $y_i = 1$ when $g_i = 1$, and $y_i = 0$ when $g_i = 2$. Let $p_1(x;\theta)=p(x;\theta)$, and $p_2(x;\theta) = 1-p(x;\theta)$. The log-likelihood can be written:
 $$
-\begin{align}
+\begin{aligned}
 \ell(\beta) & = \sum_{i=1}^N \left\{y_i \log p(x_i; \beta) + (1-y_i) \log(1-p(x_i;\beta)) \right\} \\
             & = \sum_{i=1}^N \left\{y_i \log \frac{p(x_i;\beta)}{1-p(x_i; \beta)} + \log\left(1-p(x_i; \beta)\right) \right\} \\
             & = \sum_{i=1}^N \left\{y_i \beta^Tx_i + \log\left(1-\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} \right) \right\} \\
             & = \sum_{i=1}^N \left\{y_i \beta^Tx_i + \log\left(\frac{1}{1+e^{\beta^Tx_i}}\right) \right\} \\
             & = \sum_{i=1}^N \left\{y_i \beta^Tx_i - \log\left(1+e^{\beta^Tx_i} \right) \right\}
-\end{align}
+\end{aligned}
 $$
 
 To maximize log-likelihood, take the derivative to get the *score* equations, and set to zero.
 $$
-\begin{align}
+\begin{aligned}
 \ell(\beta) & = \sum_{i=1}^N \left\{y_i \beta^Tx_i - \log\left(1+e^{\beta^Tx_i} \right) \right\} \\
 \frac{\partial \ell(\beta)}{\partial\beta} & = \sum_{i=1}^N \left\{y_ix_i-\frac{1}{1+e^{\beta^Tx_i}}\left(e^{\beta^Tx_i} \right)\left(x_i\right) \right\} \\
 \frac{\partial \ell(\beta)}{\partial\beta} & = \sum_{i=1}^N x_i \left(y_i-p(x_i;\beta) \right) = 0
-\end{align}
+\end{aligned}
 $$
 
 These are $p+1$ equations *nonlinear* in $\beta$. Since there's no closed form solution, we solve it numerically, using something called the Newton-Raphson algorithm, which requires the second derivative or Hessian matrix:
 $$
-\begin{align}
+\begin{aligned}
 \frac{\partial \ell(\beta)}{\partial\beta} & = \sum_{i=1}^N x_i \left(y_i- \frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} \right) \\
 \frac{\partial^2 \ell(\beta)}{\partial \beta \partial \beta^T} & = \sum_{i=1}^N x_i \left(\frac{x_ie^{\beta^Tx_i} \left(1+e^{\beta^T x_i} \right) - x_ie^{\beta^T x_i}\left(e^{\beta^Tx_i} \right)}{\left(1+e^{\beta^Tx_i} \right)^2} \right) \\
         & = \sum_{i=1}^N x_i x_i^T \left(\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}} + \left(\frac{e^{\beta^Tx_i}}{1+e^{\beta^Tx_i}}\right)^2\right) \\
         & = \sum_{i=1}^N x_i x_i^T \left(p(x_i;\beta)+ p^2(x_i;\beta) \right) \\
         & = - \sum_{i=1}^N x_i x_i^T p(x_i;\beta) \left(1-p(x_i;\beta)\right)
-\end{align}
+\end{aligned}
 $$
 
 Starting with a guess $\beta^{\text{old}}$, a single Newton update is
@@ -167,19 +191,19 @@ $$
 
 The score and the Hessian can be written conveniently in matrix notation. Let $\mathbf{y}$ denote the vector of $y_i$ values, $\mathbf{X}$ the $N \times (p+1)$ matrix of $x_i$ values, $\mathbf{p}$ the vector of fitted probabilities with $i$th element $p(x_i; \beta^{\text{old}})$ and $\mathbf{W}$ an $N \times N$ diagonal matrix of weights with $i$th diagonal element $p(x_i; \beta^{\text{old}})(1-p(x_i; \beta^{\text{old}}))$. Then we have:
 $$
-\begin{align}
+\begin{aligned}
 \frac{\partial \ell (\beta)}{\partial \beta} & = \mathbf{X}^T (\mathbf{y}-\mathbf{p}) \\
 \frac{\partial^2 \ell(\beta)}{\partial \beta \partial \beta^T} & = -\mathbf{X}^T \mathbf{WX}
-\end{align}
+\end{aligned}
 $$
 
 The Newton step is thus:
 $$
-\begin{align}
+\begin{aligned}
 \beta^{\text{new}}  & = \beta^{\text{old}} + \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T (\mathbf{y}-\mathbf{p}) \\
                     & = \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T \mathbf{W} \left(\mathbf{X} \beta^{\text{old}} + \mathbf{W}^{-1}\left(\mathbf{y}-\mathbf{p} \right) \right) \\
                     & = \left(\mathbf{X}^T \mathbf{WX} \right)^{-1} \mathbf{X}^T \mathbf{Wz}
-\end{align}
+\end{aligned}
 $$
 
 Rewriting it this way re-expresses the Newton step as a weighted least squares step, with the response
@@ -202,38 +226,38 @@ Consider a hyperplane or *affine set* $L$ defined by $f(x) = \beta_0+\beta^Tx=0$
 Some properties:
 
   1. For any two points $x_1$, $x_2$ lying in $L$:
-  
+
       $$
-      \begin{align}
+      \begin{aligned}
       \beta_0 + \beta^Tx_1 & = \beta_0 + \beta^Tx_2 = 0 & \text{by definition of } L\\
       \beta^Tx_1 & = \beta^Tx_2 \\
       \beta^Tx_1 - \beta^Tx_2 & = 0 \\
       \beta^T \left(x_1-x_2 \right) & = 0
-      \end{align}
+      \end{aligned}
       $$
       - $\beta^T \left(x_1-x_2 \right) = 0$ implies that the vector $\beta$ is orthogonal to the vector $\left(x_1-x_2\right)$ on the surface of $L$.
-      
+
       - Hence, $\beta^{*} = \frac{\beta}{\lVert \beta \rVert}$ is the vector normal to the surface of $L$.
   2. For any point $x_0 \in L$, $\beta^T x_0 = -\beta_0$. (This follows directly from the definition of $L$.)
   3. The signed distance of any point $x$ to $L$ is given by
-  
+
   $$
-  \begin{align}
+  \begin{aligned}
     & \qquad {\beta^{*}}^T \left(x-x_0 \right)  & \text{projection of the vector }x-x_0 \text{ in the direction of }\beta^{*}\\
     & = \frac{1}{\lVert \beta \rVert} \left(\beta^Tx+\beta_0 \right) \\
     & = \frac{1}{\lVert f^{\prime}(x) \rVert}f(x).
-  \end{align}
+  \end{aligned}
   $$
-  
+
   Hence, $f(x)$ is proportional to the signed distance from $x$ to the hyperplane defined by $f(x)=0$.
-  
-      
+
+
 ### **4.5.1 Rosenblatt's Perceptron Learning Algorithm**
 ***Perceptron learning algorithm*** - find a separating hyperplane by minimizing the distance of misclassified points to the decision boundary.
 
   - if response $y_i = 1$ is misclassified, then $x_i^T\beta+\beta_0 < 0$
   - if response $y_i = -1$ is misclassified, then $x_i^T\beta+\beta_0 > 0$.
-  
+
 Therefore, the goal can be stated as minimizing
 $$
 D(\beta, \beta_0) = - \sum_{i \in \mathcal{M}} y_i \left(x_i^T \beta + \beta_0 \right),
@@ -248,9 +272,9 @@ $D(\beta, \beta_0)$ is:
 
 The gradient (assuming $\mathcal{M}$ is fixed):
 $$
-\begin{align}
-\nabla_\beta D(\beta,\beta_0) & = - \sum_{i \in \mathcal{M}} y_i x_i  &&&\nabla_{\beta_0}D(\beta, \beta_0)  = -\sum_{i \in \mathcal{M}}y_i \\ 
-\end{align}
+\begin{aligned}
+\nabla_\beta D(\beta,\beta_0) & = - \sum_{i \in \mathcal{M}} y_i x_i  &&&\nabla_{\beta_0}D(\beta, \beta_0)  = -\sum_{i \in \mathcal{M}}y_i \\
+\end{aligned}
 $$
 
 The perceptron algorithm uses ***stochastic gradient descent*** to minimize $D(\beta, \beta_0)$, i.e. the parameters are updated after visiting each observation rather than the entire training set. The update rule:
@@ -264,13 +288,13 @@ Problems with the perceptron algorithm:
   - When the data are separable, there are many solutions, and the chosen solution depends on the initial values
   - Although guaranteed to be finite, the number of steps can be very large. Smaller gaps require longer time to find.
   - When the data are not separable, the algorithm will not converge, and cycles develop which can be hard to detect.
-  
+
 ### **Optimal Separating Hyperplanes**
 ***Optimal separating hyperplane***- separate two classes and maximize the distance to the closest point from either class
 
   - provides a unique solution
   - better performance on test data by maximizing the margin between classes
-  
+
 The optimization problem:
 $$
 \max_{\beta, \beta_0, \lVert \beta \rVert =1} M \\
@@ -278,10 +302,10 @@ $$
 $$
 This is equivalent to:
 $$
-\begin{align}
+\begin{aligned}
 \frac{1}{\lVert \beta \rVert} y_i \left(x_i^T\beta + \beta_0 \right) & \geq M & \text{note that this redefines }\beta_0 \\
 y_i \left(x_i^T\beta + \beta_0 \right) & \geq M \lVert \beta \rVert \\
-\end{align}
+\end{aligned}
 $$
 Since for any $\beta$ and $\beta_0$ satisfying these inequalities, any positively scaled multiple satisfies them too, we can choose $\lVert \beta \rVert= \frac{1}{M}$. Then,
 $$
