@@ -5,6 +5,7 @@ date: December 28, 2016
 mainfont: FreeSans
 linkcolor: "purple"
 header-includes:
+    \usepackage[dvipsnames]{xcolor}
     \usepackage{enumitem}
     \setlistdepth{9}
     \setlist[itemize,1]{label=$\bullet$}
@@ -31,7 +32,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=TRUE)
 ```
 # **Two simple approaches to prediction: Least Squares and Nearest Neighbors**
 This post follows Chapter 2.3 in the [Elements of Statistical Learning](http://statweb.stanford.edu/~tibs/ElemStatLearn/). Note that the data for exactly reproducing the figures in the book are available in `mixture.example` from the R package `ElemStatLearn`, but here I'll be going through the example from scratch.
@@ -40,7 +41,7 @@ This section develops the ***linear model fit by least squares*** and the ***$\t
 
 First, I generate training data from a Gaussian mixture model as described in section 2.3.3:
 
-> First, we generated 10 means $m_k$ from a bivariate Gaussian distribution $N((1,0)^T, \mathbf{I})$ and labeled this class $\color{cornflowerblue}{\texttt{BLUE}}$. Similarly, 10 more were drawn from $N((0,1)^T, \mathbf{I})$ and labeled class $\color{darkorange}{\texttt{ORANGE}}$. Then for each class we generated 100 observations as follows: for each observation, we picked an $m_k$ at random with probability $1/10$, and then generated a $N(m_k, \mathbf{I}/5)$, thus leading to a mixture of Gaussian clusters for each class.
+> First, we generated 10 means $m_k$ from a bivariate Gaussian distribution $N((1,0)^T, \mathbf{I})$ and labeled this class $\color{CornflowerBlue}{\texttt{BLUE}}$. Similarly, 10 more were drawn from $N((0,1)^T, \mathbf{I})$ and labeled class $\color{Orange}{\texttt{ORANGE}}$. Then for each class we generated 100 observations as follows: for each observation, we picked an $m_k$ at random with probability $1/10$, and then generated a $N(m_k, \mathbf{I}/5)$, thus leading to a mixture of Gaussian clusters for each class.
 
 ```{r generate data as in ESL 2.3.3, fig.align='center', fig.cap='The training data. Filled points represent the means $m_k$ of the Gaussians used to generate each class.'}
 library(MASS)
@@ -58,23 +59,36 @@ oracle = function(npoints){
 
   #choose m_k for blue and orange
   blue.means = as_data_frame(mvrnorm(n=10, mu=blue.mu, Sigma=diag(2)))
-  blue.means$color = factor(rep(0,nrow(blue.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  blue.means$color = factor(rep(0,nrow(blue.means)),
+                            levels = c(0,1),
+                            labels = c("BLUE", "ORANGE"))
   og.means = as_data_frame(mvrnorm(n=10, mu=og.mu, Sigma=diag(2)))
-  og.means$color = factor(rep(1, nrow(og.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  og.means$color = factor(rep(1, nrow(og.means)),
+                          levels = c(0,1),
+                          labels = c("BLUE", "ORANGE"))
 
   #randomly choose npoints number of m_k for blue and orange
   blue.randmean = blue.means[sample(1:nrow(blue.means),npoints, replace = TRUE),1:2]
   og.randmean = og.means[sample(1:nrow(og.means),npoints, replace = TRUE),1:2]
 
   #generate datapoints from MVrandom normal with means chosen above
-  blue.data = as_data_frame(t(apply(blue.randmean, MARGIN=1, function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
-  og.data = as_data_frame(t(apply(og.randmean, MARGIN=1, function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
-  blue.data$color = factor(rep(0, nrow(blue.data)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
-  og.data$color = factor(rep(1, nrow(og.means)), levels = c(0,1), labels = c("BLUE", "ORANGE"))
+  blue.data = as_data_frame(t(apply(blue.randmean,
+                                    MARGIN=1,
+                                    function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
+  og.data = as_data_frame(t(apply(og.randmean,
+                                  MARGIN=1,
+                                  function(x) mvrnorm(n=1, mu=x, Sigma=diag(2)/5))))
+  blue.data$color = factor(rep(0, nrow(blue.data)),
+                           levels = c(0,1),
+                           labels = c("BLUE", "ORANGE"))
+  og.data$color = factor(rep(1, nrow(og.means)),
+                         levels = c(0,1),
+                         labels = c("BLUE", "ORANGE"))
 
   #return plotdata, a dataframe containing training data
   #return meandata, a dataframe containing the generating m_k
-  return(list(plotdata = rbind(blue.data, og.data), meandata = rbind(blue.means, og.means)))
+  return(list(plotdata = rbind(blue.data, og.data),
+              meandata = rbind(blue.means, og.means)))
 }
 
 #generate training data wih 100 points of each color
@@ -82,8 +96,12 @@ train = oracle(100)
 
 #plot training data
 (a = ggplot() +
-      geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), shape=21, size=2, stroke=1) +
-      geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=3) +
+      geom_point(data = train$plotdata,
+                 aes(x=V1, y=V2, color=color),
+                 shape=21, size=2, stroke=1) +
+      geom_point(data = train$meandata,
+                 aes(x=V1, y=V2, color=color),
+                 size=3) +
       scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
       xlab("X1") + ylab("X2"))
 ```
@@ -114,16 +132,16 @@ $$
 $$
 , and the fitted value at the $i$th input $x_i$ is $\hat y_i = \hat y(x_i) = x_i^T \hat \beta$. At an arbitrary input $x_0$ the prediction is $\hat y(x_0) = x_0^T \hat \beta$. The entire fitted surface is characterized by the $p$ parameters $\hat \beta$.
 
-Encode the output class variable $G$, which can take on the values $\color{cornflowerblue}{\texttt{BLUE}}$ or $\color{darkorange}{\texttt{ORANGE}}$, and encode it as a response $Y$ where $0$ is $\color{cornflowerblue}{\texttt{BLUE}}$ and $1$ is $\color{darkorange}{\texttt{ORANGE}}$. Then convert the fitted values $\hat Y$ to a fitted class variable $\hat G$ according to the rule:
+Encode the output class variable $G$, which can take on the values $\color{CornflowerBlue}{\texttt{BLUE}}$ or $\color{Orange}{\texttt{ORANGE}}$, and encode it as a response $Y$ where $0$ is $\color{CornflowerBlue}{\texttt{BLUE}}$ and $1$ is $\color{Orange}{\texttt{ORANGE}}$. Then convert the fitted values $\hat Y$ to a fitted class variable $\hat G$ according to the rule:
 $$
 \hat G = \begin{cases}
-        \color{darkorange}{\texttt{ORANGE}}  & \text{if } \hat Y > 0.5 \\
-        \color{cornflowerblue}{\texttt{BLUE}}    & \text{if } \hat Y \leq 0.5
+        \color{Orange}{\texttt{ORANGE}}  & \text{if } \hat Y > 0.5 \\
+        \color{CornflowerBlue}{\texttt{BLUE}}    & \text{if } \hat Y \leq 0.5
         \end{cases}
 $$
 
 
-```{r linear model, fig.align='center', fig.cap='Classification by linear regression. The orange shaded region represents points that will be classified as $\\color{darkorange}{\\texttt{ORANGE}}$, while the blue region will be classified as $\\color{cornflowerblue}{\\texttt{BLUE}}$'}
+```{r linear model, fig.align='center', fig.cap='Classification by linear regression. The orange shaded region represents points that will be classified as $\\color{Orange}{\\texttt{ORANGE}}$, while the blue region will be classified as $\\color{CornflowerBlue}{\\texttt{BLUE}}$'}
 X = as.matrix(cbind(rep(1, nrow(train$plotdata)), train$plotdata[,-3]))
 y = ifelse(train$plotdata$color=="ORANGE", 1, 0)
 
@@ -153,9 +171,15 @@ linreg.plotdata = cbind(x.new, linreg.pred)
 
 #plot linear model classification
 (b = ggplot() +
-      geom_point(data = linreg.plotdata, aes(x=V1, y=V2, color=linreg.pred), size=0.05) +
-      geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), shape=21, size=2, stroke=1) +
-      geom_abline(slope = -beta.hat[2]/beta.hat[3], intercept = (.5-beta.hat[1])/beta.hat[3], color="black") +
+      geom_point(data = linreg.plotdata,
+                 aes(x=V1, y=V2, color=linreg.pred),
+                 size=0.05) +
+      geom_point(data = train$plotdata,
+                 aes(x=V1, y=V2, color=color),
+                 shape=21, size=2, stroke=1) +
+      geom_abline(slope = -beta.hat[2]/beta.hat[3],
+                  intercept = (.5-beta.hat[1])/beta.hat[3],
+                  color="black") +
       scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
       xlab("X1") + ylab("X2"))
 ```
@@ -165,15 +189,21 @@ Because in this case we know the generating function of the distribution, we can
 $$
 \hat G(x) = \max_{g \in G} \text{Pr}(g \mid X=x)
 $$
-. In R, this amounts to summing the probabilities of a point being generated by the multivariate normal distributions centered at the $\color{cornflowerblue}{\texttt{BLUE }} m_k$, summing the probabilities of a point being generated by the multivariate normal distributions centered at the $\color{darkorange}{\texttt{ORANGE }} m_k$, and classifying to the class with the higher probability.
+. In R, this amounts to summing the probabilities of a point being generated by the multivariate normal distributions centered at the $\color{CornflowerBlue}{\texttt{BLUE }} m_k$, summing the probabilities of a point being generated by the multivariate normal distributions centered at the $\color{Orange}{\texttt{ORANGE }} m_k$, and classifying to the class with the higher probability.
 
 
 ```{r calculate bayes error rate, fig.align='center', fig.cap="The optimal Bayes decision boundary."}
 mybayes = function(xnew,means){
   bayes.df = data_frame(pblue=numeric(nrow(xnew)), pog=numeric(nrow(xnew)))
   for (i in 1:10){
-    bayes.df$pblue = bayes.df$pblue + dmvnorm(x=xnew, mean=as.vector(as.numeric(means[i,1:2])), sigma = diag(2)/5)
-    bayes.df$pog = bayes.df$pog + dmvnorm(x=xnew, mean=as.vector(as.numeric(means[i+10,1:2])), sigma = diag(2)/5)
+    bayes.df$pblue = bayes.df$pblue + 
+        dmvnorm(x=xnew,
+                mean=as.vector(as.numeric(means[i,1:2])),
+                sigma = diag(2)/5)
+    bayes.df$pog = bayes.df$pog + 
+        dmvnorm(x=xnew,
+                mean=as.vector(as.numeric(means[i+10,1:2])),
+                sigma = diag(2)/5)
   }
   bayes.df$prediction = ifelse(bayes.df$pog>bayes.df$pblue, "ORANGE", "BLUE")
   bayes.plotdata = cbind(xnew, bayes.df$prediction)
@@ -183,11 +213,15 @@ mybayes = function(xnew,means){
 grid.bayes = mybayes(x.new, train$meandata)
 
 (bayes.plot = ggplot() +
-                geom_point(data = grid.bayes, aes(x=V1, y=V2, color=color), size=0.05) +
-                geom_point(data = train$plotdata, aes(x=V1, y=V2, color=color), shape=21, size=2, stroke=1) +
-                #geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
-                scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
-                xlab("X1") + ylab("X2"))
+        geom_point(data = grid.bayes,
+                   aes(x=V1, y=V2, color=color),
+                   size=0.05) +
+        geom_point(data = train$plotdata,
+                   aes(x=V1, y=V2, color=color),
+                   shape=21, size=2, stroke=1) +
+        #geom_point(data = train$meandata, aes(x=V1, y=V2, color=color), size=4) +
+        scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
+        xlab("X1") + ylab("X2"))
 ```
 
 
@@ -236,8 +270,12 @@ plotknn = function(k){
   boundary.data = as_data_frame(cbind(x.new, knn.yhat))
 
   c = ggplot() +
-        geom_point(data=knn.plotdata, aes(x=V1, y=V2, color=knn.pred), size=0.05) +
-        geom_point(data=train$plotdata, aes(x=V1,y=V2, color=color), shape=21, size=2, stroke=1) +
+        geom_point(data=knn.plotdata,
+                   aes(x=V1, y=V2, color=knn.pred),
+                   size=0.05) +
+        geom_point(data=train$plotdata,
+                   aes(x=V1,y=V2, color=color),
+                   shape=21, size=2, stroke=1) +
         #geom_contour(data=boundary.data, aes(x=V1,y=V2,z=knn.yhat), bins=1, color="black") +
         scale_color_manual(values= c("#6495ED","#FF8C00"), guide=FALSE) +
         ggtitle(paste(k, "nn"))
@@ -269,7 +307,10 @@ test.linreg.pred = ifelse(test.linreg.yhat>0.5, 1, 0)
 linreg.testerr = prediction.error(y.test, test.linreg.pred)
 
 #calculate Bayes error
-bayes.error = prediction.error(ifelse(mybayes(as_data_frame(X[,-1]), train$meandata)[,3]=="ORANGE",1,0 ), y)
+bayes.error = prediction.error(ifelse(mybayes(as_data_frame(X[,-1]),
+                                              train$meandata)[,3]=="ORANGE",
+                                      1,0), 
+                               y)
 
 #calculate training and test errors for KNN
 kvector = c(1,3,5,7,11,21,31,45,69,101,151)
@@ -286,7 +327,8 @@ for (k in kvector){
 }
 
 #plot error as function of k
-(error.plot = ggplot(data = melt(knn.error.df, id.vars='k'), aes(x=k, y=value, group=variable, color=variable)) +
+(error.plot = ggplot(data = melt(knn.error.df, id.vars='k'),
+                     aes(x=k, y=value, group=variable, color=variable)) +
               geom_point() +
               geom_line() +
               scale_x_log10() +
